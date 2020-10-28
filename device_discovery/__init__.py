@@ -29,7 +29,7 @@ def teardown_db(exception):
 # discover addresses in LAN
 # def discoverDevices():
 
-# parse addresses to determine smart devices
+# parse addresses to smart devices Objects and add them to the DB
 # def getSmartDevices():
 
 

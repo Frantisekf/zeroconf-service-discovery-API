@@ -2,10 +2,7 @@ import sys
 import os
 from flask import Flask, g
 from flask_restful import Resource, Api
-from scapy import srp, Ether, ARP, conf
 import shelve
-
-
 
 
 # Create an instance of Flask
@@ -27,24 +24,6 @@ def teardown_db(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-# Create a list of MAC addresses with supported devices
-
-# discover addresses in LAN
-
-
-def discoverDevices():
-    conf.verb = 0
-    ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst="192.168.0.1"),
-                     timeout=2)
-
-    print(r"MAC,IP")
-    for snd, rcv in ans:
-        print(rcv.sprintf(r"%Ether.src%,%ARP.psrc%"))
-
-
-# parse addresses to smart devices Objects and add them to the DB
-# def getSmartDevices():
 
 
 class Devices(Resource):

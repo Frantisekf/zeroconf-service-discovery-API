@@ -26,7 +26,7 @@ def teardown_db(exception):
         db.close()
 
 
-class Devices(Resource):
+class ServicesRoute(Resource):
     def get(self):
         shelf = get_db()
         keys = list(shelf.keys())
@@ -39,15 +39,15 @@ class Devices(Resource):
         return {'message': 'Success', 'data': devices}, 200
 
 
-class Device(Resource):
+class ServiceRoute(Resource):
     def get(self, identifier):
         shelf = get_db()
 
         if not (identifier in shelf):
-            return {'message': 'Device not found', 'data': {}}, 404
+            return {'message': 'Service not found', 'data': {}}, 404
 
-        return {'message': 'Device found', 'data': shelf[identifier]}, 200
+        return {'message': 'Service found', 'data': shelf[identifier]}, 200
 
 
-api.add_resource(Devices, '/devices')
-api.add_resource(Device, '/device/<string:identifier>')
+api.add_resource(ServicesRoute, '/services')
+api.add_resource(ServiceRoute, '/service/<string:identifier>')

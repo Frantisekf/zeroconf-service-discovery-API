@@ -31,7 +31,7 @@ This service browses the published zeroconf services in the local network of the
   }
 ]
 ```
-## Publish a service
+## Register a service
 
 `POST /services`
 

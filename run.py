@@ -1,3 +1,3 @@
-from device_discovery import app
+from service_discovery import app
 
 app.run(host='0.0.0.0', port=80, debug=True)

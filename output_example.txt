@@ -1,0 +1,18 @@
+
+GET
+
+SpZc-661C03._spotify-connect._tcp.local. 
+type='_spotify-connect._tcp.local.'
+name='SpZc-661C03._spotify-connect._tcp.local.'
+addresses=[b'\xc0\xa8\xb2\x90']
+port=41800
+server='PS4-661C03.local.'
+properties={b'CPath': b'/spConn'})
+
+POST 
+
+
+name='SpZc-661C03._spotify-connect._tcp.local.'
+port=41800
+properties={b'CPath': b'/spConn'})
+

@@ -96,20 +96,20 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         shelf = get_db()
-        shelf[args['identifier']] = args
+        shelf[args['name']] = args
 
         # handle parsing object into zeroconf service
 
-        if args:
-            info = ServiceInfo(
-                shelf['name'],
-                shelf['protocol'],
-                addresses=[socket.inet_aton("127.0.0.1")],
-                port=shelf['port']
-            )
+        # if args:
+        #     info = ServiceInfo(
+        #         shelf['name'],
+        #         shelf['protocol'],
+        #         addresses=[socket.inet_aton("127.0.0.1")],
+        #         port=shelf['port']
+        #     )
             
-            zeroconf = Zeroconf(IPVersion.V4Only)
-            zeroconf.register_service(info)
+        #     zeroconf = Zeroconf(IPVersion.V4Only)
+        #     zeroconf.register_service(info)
         
         return {'message': 'Service published', 'data': args}, 201
 

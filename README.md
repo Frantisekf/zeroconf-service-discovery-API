@@ -23,8 +23,8 @@ This service browses the published zeroconf services in the local network of the
 - `docker-compose up`
 10. You're done!
 
-
-## List all services
+## API Usage
+### List all services
 
 **Definition**
 
@@ -50,7 +50,7 @@ This service browses the published zeroconf services in the local network of the
   }
 ]
 ```
-## Register a service
+### Register a service
 
 `POST /services`
 
@@ -58,7 +58,7 @@ This service browses the published zeroconf services in the local network of the
 
 - `201 created` on successful register 
 
-## Lookup single service details
+### Lookup single service details
 
 `GET /service/<identifier>`
 

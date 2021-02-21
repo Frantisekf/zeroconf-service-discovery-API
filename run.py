@@ -1,3 +1,7 @@
 from service_discovery import app
+import os
+from dotenv import load_dotenv
 
-app.run(host='0.0.0.0', port=80, debug=True)
+load_dotenv()
+
+app.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('DEBUG'))

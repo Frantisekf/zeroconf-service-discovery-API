@@ -1,12 +1,15 @@
-# Device Discovery Service
+# Zeroconf Service Discovery API
 
-Service would gather the MAC addresses of the devices in the local area network of the server where the service is running. Parses the output from the discovery and picks only the supported smart devices based on their MAC addresses. List of these devices can be then fetched through this REST API
+This service browses the published zeroconf services in the local network of the server where the service is running and returns the results of the browse through the specified API endpoint. A service can be also registered by the API user through the POST method in /services endpoint.
 
-## List all devices
+## Installation
+
+
+## List all services
 
 **Definition**
 
-`GET /devices`
+`GET /services`
 
 **Response**
 
@@ -28,14 +31,21 @@ Service would gather the MAC addresses of the devices in the local area network 
   }
 ]
 ```
+## Publish a service
 
-## Lookup single device details
-
-`GET /device/<identifier>`
+`POST /services`
 
 **Response**
 
-- `404 Not Found` if the device does not exist
+- `201 created` on successful register 
+
+## Lookup single service details
+
+`GET /service/<identifier>`
+
+**Response**
+
+- `404 Not Found` if the service does not exists 
 - `200 OK` on success
 
 ```json

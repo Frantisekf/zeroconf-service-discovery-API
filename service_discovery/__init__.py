@@ -57,8 +57,7 @@ class Collector:
                         print("    %s: %s" % (key, value))
                 else:
                     print("  No properties")
-            self.infos.append(info)  # <--------------------------------
-
+            self.infos.append(info)  
 
 class ServicesRoute(Resource):
     logging.basicConfig(level=logging.DEBUG)
@@ -81,14 +80,14 @@ class ServicesRoute(Resource):
         for key in collector.infos:
             servicesDiscovered.append(shelf[key])
 
-        return {'message': 'Success', 'services': servicesDiscovered}, 200
+        return {'message': 'Success', 'services': collector.infos}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
 
         parser.add_argument('name', required=True)
         parser.add_argument('protocol', required=True)
-        parser.add_argument('type', required=True)
+        parser.add_argument('type', required=False)
         parser.add_argument('port', required=True)
         parser.add_argument('subtype', required=False)
 
@@ -100,16 +99,16 @@ class ServicesRoute(Resource):
 
         # handle parsing object into zeroconf service
 
-        # if args:
-        #     info = ServiceInfo(
-        #         shelf['name'],
-        #         shelf['protocol'],
-        #         addresses=[socket.inet_aton("127.0.0.1")],
-        #         port=shelf['port']
-        #     )
+        if args:
+            info = ServiceInfo(
+                args.name,
+                args.protocol,
+                addresses=[socket.inet_aton("127.0.0.1")],
+                port=int(args.port)
+            )
             
-        #     zeroconf = Zeroconf(IPVersion.V4Only)
-        #     zeroconf.register_service(info)
+            zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
+            zeroconf.register_service(info)
         
         return {'message': 'Service published', 'data': args}, 201
 

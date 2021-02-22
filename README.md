@@ -15,7 +15,7 @@ Compatible with:
 3. You're done!
 
 
-Note: you can configure the `port` and `hostname` in the `.env` file
+Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env` file
 
 
 ## Installing and running in a docker container
@@ -38,6 +38,10 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 9. To run the application, run this command from the zeroconf-service-discovery-API directory:
 - `docker-compose up`
 10. You're done!
+
+
+
+Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env` file
 
 ## API Usage
 ### List all services

@@ -47,23 +47,45 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 ```json
 [
   {
-    "identifier": "smart-bulp",
-    "name": "smart-bulp",
-    "device_type": "<type>",
-    "controller_gateway": "192.1.68.0.1"
-  },
-  {
-    "identifier": "smart-tv",
-    "name": "smart-tv",
-    "device_type": "<type>",
-    "controller_gateway": "192.168.0.3"
+    "message": "Success",
+    "services": [
+        {
+            "name": "local-service._companion-link._tcp.local.",
+            "addresses": [
+                "192.168.178.58",
+                "fe80::1893:e42f:9c41:1427"
+            ],
+            "type": "_companion-link._tcp.local.",
+            "port": 59848,
+            "domain": "hostname.local.",
+            "rpHN": "0a45831c7595",
+            "rpFl": "0x20000",
+            "rpVr": "220.9",
+            "rpHA": "12addsds674b7",
+            "rpAD": "ff57c22c0db3",
+            "rpHI": "532f1596965c",
+            "rpBA": "00:4E:C2:3E:3D:11"
+        }
+    ]
   }
 ]
 ```
 ### Register a service
 
 `POST /services`
-
+```json
+{
+    "message": "Service published",
+    "data": {
+        "name": "new service._http._tcp.local.",
+        "protocol": "_http._tcp.local.",
+        "type": "tcp",
+        "port": "7790",
+        "domain": "domain.local.",
+        "subtype": null
+    }
+}
+```
 **Response**
 
 - `201 created` on successful register 
@@ -78,12 +100,24 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 - `200 OK` on success
 
 ```json
-{
-  "identifier": "smart-bulp",
-  "name": "smart-bulp",
-  "device_type": "<type>",
-  "controller_gateway": "192.1.68.0.1s"
-}
+
+  {
+     "name": "local-service._companion-link._tcp.local.",
+     "addresses": [
+         "192.168.178.58",
+         "fe80::1893:e42f:9c41:1427"
+      ],
+      "type": "_companion-link._tcp.local.",
+      "port": 59848,
+      "domain": "hostname.local.",
+      "rpHN": "0a45831c7595",
+      "rpFl": "0x20000",
+      "rpVr": "220.9",
+      "rpHA": "12addsds674b7",
+      "rpAD": "ff57c22c0db3",
+      "rpHI": "532f1596965c",
+      "rpBA": "00:4E:C2:3E:3D:11"
+   }
 ```
 
 ## TODO

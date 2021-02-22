@@ -62,7 +62,7 @@ class ServicesRoute(Resource):
 
         collector = Collector()
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-        time.sleep(4)
+        time.sleep(1)
 
         
         for info in collector.infos:
@@ -87,10 +87,10 @@ class ServicesRoute(Resource):
 
         parser.add_argument('name', required=True)
         parser.add_argument('protocol', required=True)
-        parser.add_argument('type', required=False)
         parser.add_argument('port', required=True)
         parser.add_argument('domain', required=True)
         parser.add_argument('subtype', required=False)
+        parser.add_argument('properties',type=dict, required=False)
 
         # parse arguments into an object
         args = parser.parse_args()
@@ -99,15 +99,13 @@ class ServicesRoute(Resource):
         shelf[args['name']] = args
 
         # handle parsing object into zeroconf service
-        desc = {'path': '/~path/'}
-
         if args:
             new_service = ServiceInfo(
                 args.name,
                 args.protocol,
                 addresses=[socket.inet_aton("127.0.0.1")],
                 port=int(args.port),
-                properties=desc,
+                properties=args.properties,
             )
             
             ip_version = IPVersion.V4Only

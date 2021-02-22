@@ -123,5 +123,7 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 - [ ] introduce unregister endpoint 
 - [ ] improve error handling
 - [ ] optimize usage of shelve
+- [ ] Service discovery run globally
+- [ ] write tests
 
 

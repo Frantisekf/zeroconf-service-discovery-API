@@ -2,7 +2,17 @@
 
 This service browses the published zeroconf services in the local network of the server where the service is running and returns the results of the browse through the specified API GET endpoint. A service can be also registered by the API user through the POST method in /services endpoint. Primary usage of this service is to be used on devices such as Raspberry pi which is situated in the local network.
 
-## Installing and running a development server on Rpi
+## Installing and running on a development server
+1. Clone the repository & navigate to directory and run:
+- `pip3 install -r requirements.txt`
+- `python3 run.py`
+2. You're done!
+
+
+Note: you can configure the `port` and `hostname` in the `.env` file
+
+
+## Installing and running in a docker container
 1. Install Docker.
 - `curl -sSL https://get.docker.com | sh`
 2. Add permission to user.
@@ -75,3 +85,10 @@ This service browses the published zeroconf services in the local network of the
   "controller_gateway": "192.1.68.0.1s"
 }
 ```
+
+## TODO
+- [ ] run each published service in a separate thread
+- [ ] introduce unregister endpoint 
+- [ ] improve error handling
+
+

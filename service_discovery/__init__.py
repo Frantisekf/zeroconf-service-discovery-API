@@ -85,7 +85,7 @@ class ServicesRoute(Resource):
         parser.add_argument('port', required=True)
         parser.add_argument('domain', required=True)
         parser.add_argument('subtype', required=False)
-        parser.add_argument('properties',type=dict, required=False)
+        parser.add_argument('properties', type=dict, required=False)
 
         # parse arguments into an object
         args = parser.parse_args()

@@ -4,7 +4,7 @@ This service browses the published zeroconf services in the local network of the
 
 ## Installing and running on a development server
 1. Clone the repository & navigate to directory and run:
-- `pip3 install -r requirements.txt`
+- `sudo pip3 install -r requirements.txt`
 - `python3 run.py`
 2. You're done!
 

@@ -12,7 +12,7 @@ This service browses the published zeroconf services in the local network of the
 Note: you can configure the `port` and `hostname` in the `.env` file
 
 
-## Installing and running in a docker environment
+## Installing and running in a docker container
 1. Install Docker.
 - `curl -sSL https://get.docker.com | sh`
 2. Add permission to user.

@@ -6,6 +6,8 @@ from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
 import threading
+import json
+
 
 import argparse
 import logging
@@ -27,6 +29,8 @@ def get_db():
         db = g._database = shelve.open("services")
     return db
 
+def obj_dict(obj):
+    return obj.__dict__    
 
 @app.teardown_appcontext
 def teardown_db(exception):
@@ -38,32 +42,20 @@ def teardown_db(exception):
 class Collector:
     def __init__(self):
         self.infos = []
-
+    
     def on_service_state_change(
         self, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
     ) -> None:
-        print("Service %s of type %s state changed: %s" % (name, service_type, state_change))
     
         if state_change is ServiceStateChange.Added:
             info = zeroconf.get_service_info(service_type, name)
-            print("Info from zeroconf.get_service_info: %r" % (info))
-            if info:
-                addresses = ["%s:%d" % (addr, cast(int, info.port)) for addr in info.parsed_addresses()]
-                print("  Addresses: %s" % ", ".join(addresses))
-                print("  Weight: %d, priority: %d" % (info.weight, info.priority))
-                print("  Server: %s" % (info.server,))
-                if info.properties:
-                    print("  Properties are:")
-                    for key, value in info.properties.items():
-                        print("    %s: %s" % (key, value))
-                else:
-                    print("  No properties")
-            self.infos.append(info)  
-
+            self.infos.append(info) 
+            
 class ServicesRoute(Resource):
     logging.basicConfig(level=logging.DEBUG)
 
     def get(self):
+        encoding = 'utf-8'
         shelf = get_db()
         keys = list(shelf.keys())
         servicesDiscovered = []
@@ -77,9 +69,22 @@ class ServicesRoute(Resource):
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
         time.sleep(4)
 
-        print(collector.infos)
+        
+        for info in collector.infos:
+            item = {"name": info.name,
+            "addresses": info.parsed_addresses(),
+            "type": info.type,
+            "port": info.port,
+            "domain": info.server,
+            }
+            properties = {}
+            for key, value in info.properties.items():
+                    properties[key.decode(encoding)] = value.decode(encoding)
+            item.update(properties)
+            servicesDiscovered.append(item)
 
-        return {'message': 'Success', 'services': collector.infos}, 200
+
+        return {'message': 'Success', 'services': servicesDiscovered}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -98,7 +103,7 @@ class ServicesRoute(Resource):
         shelf[args['name']] = args
 
         # handle parsing object into zeroconf service
-        desc = {'path': '/~paulsm/'}
+        desc = {'path': '/~path/'}
 
         if args:
             new_service = ServiceInfo(

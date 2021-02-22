@@ -71,11 +71,12 @@ class ServicesRoute(Resource):
             "type": info.type,
             "port": info.port,
             "domain": info.server,
+            "properties": {}
             }
             properties = {}
             for key, value in info.properties.items():
                     properties[key.decode(encoding)] = value.decode(encoding)
-            item.update(properties)
+            item['properties'].update(properties)
             servicesDiscovered.append(item)
 
 

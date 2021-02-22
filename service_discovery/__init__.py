@@ -5,6 +5,7 @@ from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
+import threading
 
 import argparse
 import logging
@@ -23,7 +24,7 @@ api = Api(app)
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = shelve.open("services.db")
+        db = g._database = shelve.open("services")
     return db
 
 
@@ -74,11 +75,9 @@ class ServicesRoute(Resource):
 
         collector = Collector()
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-        time.sleep(10)
+        time.sleep(4)
 
-
-        for key in collector.infos:
-            servicesDiscovered.append(shelf[key])
+        print(collector.infos)
 
         return {'message': 'Success', 'services': collector.infos}, 200
 
@@ -89,6 +88,7 @@ class ServicesRoute(Resource):
         parser.add_argument('protocol', required=True)
         parser.add_argument('type', required=False)
         parser.add_argument('port', required=True)
+        parser.add_argument('domain', required=True)
         parser.add_argument('subtype', required=False)
 
         # parse arguments into an object
@@ -98,18 +98,22 @@ class ServicesRoute(Resource):
         shelf[args['name']] = args
 
         # handle parsing object into zeroconf service
+        desc = {'path': '/~paulsm/'}
 
         if args:
-            info = ServiceInfo(
+            new_service = ServiceInfo(
                 args.name,
                 args.protocol,
                 addresses=[socket.inet_aton("127.0.0.1")],
-                port=int(args.port)
+                port=int(args.port),
+                properties=desc,
             )
             
-            zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
-            zeroconf.register_service(info)
-        
+            ip_version = IPVersion.V4Only
+            zeroconf = Zeroconf(ip_version=ip_version)
+            zeroconf.register_service(new_service)
+
+            
         return {'message': 'Service published', 'data': args}, 201
 
 

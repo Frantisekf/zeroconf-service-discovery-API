@@ -74,17 +74,15 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 
 `POST /services`
 ```json
-{
-    "message": "Service published",
-    "data": {
-        "name": "new service._http._tcp.local.",
+"data": {
+    "name": "new service._http._tcp.local.",
         "protocol": "_http._tcp.local.",
         "type": "tcp",
         "port": "7790",
         "domain": "domain.local.",
         "subtype": null
-    }
 }
+
 ```
 **Response**
 

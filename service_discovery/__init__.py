@@ -102,7 +102,6 @@ class ServicesRoute(Resource):
                 port=int(args.port),
                 properties=args.properties,
             )
-            
             ip_version = IPVersion.V4Only
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)

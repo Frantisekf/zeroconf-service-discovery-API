@@ -1,16 +1,11 @@
-import sys
-import os
-import time
 from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
 import threading
 
-import argparse
 import logging
 from time import sleep
-from typing import cast
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
 
@@ -27,6 +22,7 @@ def get_db():
         db = g._database = shelve.open("services")
     return db
 
+
 @app.teardown_appcontext
 def teardown_db(exception):
     db = getattr(g, '_database', None)
@@ -41,11 +37,11 @@ class Collector:
     def on_service_state_change(
         self, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
     ) -> None:
-    
         if state_change is ServiceStateChange.Added:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.append(info) 
-            
+
+
 class ServicesRoute(Resource):
     logging.basicConfig(level=logging.DEBUG)
 
@@ -62,23 +58,22 @@ class ServicesRoute(Resource):
 
         collector = Collector()
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-        time.sleep(1)
+        sleep(1)
 
-        
         for info in collector.infos:
-            item = {"name": info.name,
-            "addresses": info.parsed_addresses(),
-            "type": info.type,
-            "port": info.port,
-            "domain": info.server,
-            "properties": {}
+            item = {
+                "name": info.name,
+                "addresses": info.parsed_addresses(),
+                "type": info.type,
+                "port": info.port,
+                "domain": info.server,
+                "properties": {}
             }
             properties = {}
             for key, value in info.properties.items():
-                    properties[key.decode(encoding)] = value.decode(encoding)
+                properties[key.decode(encoding)] = value.decode(encoding)
             item['properties'].update(properties)
             servicesDiscovered.append(item)
-
 
         return {'message': 'Success', 'services': servicesDiscovered}, 200
 
@@ -112,7 +107,6 @@ class ServicesRoute(Resource):
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)
 
-            
         return {'message': 'Service published', 'data': args}, 201
 
 

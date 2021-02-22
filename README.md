@@ -7,7 +7,7 @@ Compatible with:
   * Avahi
   * Bonjour
 
-## Installing and running on a development server/localhost
+## Installing and running on a development server / localhost
 1. Clone the repository & navigate to directory and run:
 - `git clone git@github.com:Frantisekf/zeroconf-service-discovery-API.git`
 - `sudo pip3 install -r requirements.txt`

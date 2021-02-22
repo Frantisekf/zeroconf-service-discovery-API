@@ -2,11 +2,17 @@
 
 This service browses the published zeroconf services in the local network of the server where the service is running and returns the results of the browse through the specified API GET endpoint. A service can be also registered by the API user through the POST method in /services endpoint. Primary usage of this service is to be used on devices such as Raspberry pi which is situated in the local network.
 
+
+Compatible with: 
+  * Avahi
+  * Bonjour
+
 ## Installing and running on a development server
 1. Clone the repository & navigate to directory and run:
+- `git clone git@github.com:Frantisekf/zeroconf-service-discovery-API.git`
 - `sudo pip3 install -r requirements.txt`
 - `python3 run.py`
-2. You're done!
+3. You're done!
 
 
 Note: you can configure the `port` and `hostname` in the `.env` file
@@ -74,17 +80,15 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 
 `POST /services`
 ```json
-{
-    "message": "Service published",
-    "data": {
-        "name": "new service._http._tcp.local.",
+"data": {
+    "name": "new service._http._tcp.local.",
         "protocol": "_http._tcp.local.",
         "type": "tcp",
         "port": "7790",
         "domain": "domain.local.",
         "subtype": null
-    }
 }
+
 ```
 **Response**
 
@@ -125,5 +129,7 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 - [ ] introduce unregister endpoint 
 - [ ] improve error handling
 - [ ] optimize usage of shelve
+- [ ] Service discovery run globally
+- [ ] write tests
 
 

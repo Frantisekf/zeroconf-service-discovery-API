@@ -2,6 +2,11 @@
 
 This service browses the published zeroconf services in the local network of the server where the service is running and returns the results of the browse through the specified API GET endpoint. A service can be also registered by the API user through the POST method in /services endpoint. Primary usage of this service is to be used on devices such as Raspberry pi which is situated in the local network.
 
+
+Compatible with: 
+  * Avahi
+  * Bonjour
+
 ## Installing and running on a development server
 1. Clone the repository & navigate to directory and run:
 - `git clone git@github.com:Frantisekf/zeroconf-service-discovery-API.git`

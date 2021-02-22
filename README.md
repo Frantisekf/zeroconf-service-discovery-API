@@ -124,5 +124,6 @@ Note: you can configure the `port` and `hostname` in the `.env` file
 - [ ] run each published service in a separate thread
 - [ ] introduce unregister endpoint 
 - [ ] improve error handling
+- [ ] optimize usage of shelve
 
 

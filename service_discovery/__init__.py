@@ -6,8 +6,6 @@ from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
 import threading
-import json
-
 
 import argparse
 import logging
@@ -28,9 +26,6 @@ def get_db():
     if db is None:
         db = g._database = shelve.open("services")
     return db
-
-def obj_dict(obj):
-    return obj.__dict__    
 
 @app.teardown_appcontext
 def teardown_db(exception):

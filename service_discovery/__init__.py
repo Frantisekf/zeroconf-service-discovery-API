@@ -4,6 +4,7 @@ import socket
 import shelve
 import threading
 
+from flask_cors import CORS
 import logging
 from time import sleep
 
@@ -14,6 +15,8 @@ app = Flask(__name__)
 
 # Create the API
 api = Api(app)
+
+cors = CORS(app)
 
 
 def get_db():

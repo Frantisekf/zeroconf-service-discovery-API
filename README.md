@@ -135,5 +135,6 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 - [ ] optimize usage of shelve
 - [ ] Service discovery run globally
 - [ ] write tests
+- [ ] Logging 
 
 

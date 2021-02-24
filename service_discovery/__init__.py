@@ -4,7 +4,7 @@ import socket
 import shelve
 import threading
 
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import logging
 from time import sleep
 
@@ -16,7 +16,8 @@ app = Flask(__name__)
 # Create the API
 api = Api(app)
 
-cors = CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 
 def get_db():
@@ -43,7 +44,6 @@ class Collector:
         if state_change is ServiceStateChange.Added:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.append(info) 
-
 
 class ServicesRoute(Resource):
     logging.basicConfig(level=logging.DEBUG)

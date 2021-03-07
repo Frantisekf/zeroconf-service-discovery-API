@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+<name >ZeroConf Service discovery</name>
+<service>
+<type>_http._tcp</type>
+<port>5000></port>
+<txt-record>get=/v1/zeroconf</txt-record>
+<txt-record>post=/v1/zeroconf</txt-record>
+</service>
+</service-group>

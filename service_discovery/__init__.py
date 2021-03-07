@@ -165,5 +165,5 @@ class ServiceRoute(Resource):
         return '', 204
 
 
-api.add_resource(ServicesRoute, '/services')
-api.add_resource(ServiceRoute, '/service/<string:identifier>')
+api.add_resource(ServicesRoute, '/v1/zeroconf')
+api.add_resource(ServiceRoute, '/v1/zeroconf/<string:identifier>')

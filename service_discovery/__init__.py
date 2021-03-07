@@ -18,8 +18,6 @@ api = Api(app)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-
-
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -51,7 +49,6 @@ class ServicesRoute(Resource):
     def get(self):
         encoding = 'utf-8'
         shelf = get_db()
-        keys = list(shelf.keys())
         servicesDiscovered = []
 
         ip_version = IPVersion.V4Only
@@ -64,6 +61,7 @@ class ServicesRoute(Resource):
         sleep(1)
 
         for info in collector.infos:
+            index = 0
             item = {
                 "name": info.name,
                 "addresses": info.parsed_addresses(),
@@ -72,21 +70,25 @@ class ServicesRoute(Resource):
                 "domain": info.server,
                 "properties": {}
             }
+
             properties = {}
             for key, value in info.properties.items():
                 properties[key.decode(encoding)] = value.decode(encoding)
             item['properties'].update(properties)
-            servicesDiscovered.append(item)
-
+            #servicesDiscovered.append(item)
+            shelf[str(index)] = item
+            servicesDiscovered.append(shelf[str(index)])
+            index += 1
+            
         return {'message': 'Success', 'services': servicesDiscovered}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument('name', required=True)
-        parser.add_argument('protocol', required=True)
-        parser.add_argument('port', required=True)
-        parser.add_argument('domain', required=True)
+        parser.add_argument('name', required=False)
+        parser.add_argument('protocol', required=False)
+        parser.add_argument('port', required=False, type=int)
+        parser.add_argument('domain', required=False)
         parser.add_argument('subtype', required=False)
         parser.add_argument('properties', type=dict, required=False)
 
@@ -94,7 +96,7 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         shelf = get_db()
-        shelf[args['name']] = args
+        #shelf[args['name']] = args
 
         # handle parsing object into zeroconf service
         if args:
@@ -102,14 +104,16 @@ class ServicesRoute(Resource):
                 args.name,
                 args.protocol,
                 addresses=[socket.inet_aton("127.0.0.1")],
-                port=int(args.port),
+                port=args.port,
                 properties=args.properties,
             )
             ip_version = IPVersion.V4Only
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)
 
-        return {'message': 'Service published', 'data': args}, 201
+            # add id as a key to service and store in db
+
+        return {'message': 'Service registered', 'data': args}, 201
 
 
 # Get single service stored in shelf db
@@ -121,6 +125,17 @@ class ServiceRoute(Resource):
             return {'message': 'Service not found', 'service': {}}, 404
 
         return {'message': 'Service found', 'data': shelf[identifier]}, 200
+    
+    def delete(self, identifier):
+        shelf = get_db()
+
+        # If the key does not exist in the data store, return a 404 error.
+        # if the key.name equals 
+        if not (identifier in shelf):
+            return {'message': 'Device not found', 'data': {}}, 404
+
+        del shelf[identifier]
+        return '', 204
 
 
 api.add_resource(ServicesRoute, '/services')

@@ -1,0 +1,57 @@
+{
+    "message": "Success",
+    "services": [
+        {
+            "name": "Fran's MacBook Pro._flametouch._tcp.local.",
+            "addresses": {
+                "ipv4": "192.168.178.58",
+                "ipv6": "fe80::1893:e42f:9c41:1427"
+            },
+            "type": "_flametouch._tcp.local.",
+            "port": 1812,
+            "domain": "Frans-MacBook-Pro.local.",
+            "properties": {}
+        },
+        {
+            "name": "Fran's MacBook Pro._rfb._tcp.local.",
+            "addresses": {
+                "ipv4": "192.168.178.58",
+                "ipv6": "fe80::1893:e42f:9c41:1427"
+            },
+            "type": "_rfb._tcp.local.",
+            "port": 5900,
+            "domain": "Frans-MacBook-Pro.local.",
+            "properties": {}
+        },
+        {
+            "name": "Fran's MacBook Pro._companion-link._tcp.local.",
+            "addresses": {
+                "ipv4": "192.168.178.58",
+                "ipv6": "fe80::1893:e42f:9c41:1427"
+            },
+            "type": "_companion-link._tcp.local.",
+            "port": 65087,
+            "domain": "Frans-MacBook-Pro.local.",
+            "properties": {
+                "rpHN": "9e1adcee7a1e",
+                "rpFl": "0x20000",
+                "rpVr": "220.9",
+                "rpHA": "7df6b718e186",
+                "rpAD": "309f7ab6b65b",
+                "rpHI": "7b74f9eecee0",
+                "rpBA": "55:B5:C0:53:40:E2"
+            }
+        },
+        {
+            "name": "myservice._mqtt._tcp.local.",
+            "addresses": {
+               "ipv4": "192.168.178.178",
+               "ipv6": "fe80::ec47:5f4d:3fc5:1ad2"
+            },
+            "type": "_mqtt._tcp.local.",
+            "port": 1883,
+            "domain": "raspberrypi.local.",
+            "properties": {}
+        }
+    ]
+}

@@ -1,4 +1,5 @@
 from flask import Flask, g
+from flask.globals import request
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
@@ -61,21 +62,31 @@ class ServicesRoute(Resource):
         sleep(1)
 
         for info in collector.infos:
+            
             index = 0
+            ipv4Address = info.parsed_addresses()[0] if info.parsed_addresses()[0] is not None else ''
+            ipv6Address = info.parsed_addresses()[1] if info.parsed_addresses()[1] is not None else ''
+            hostname = socket.gethostbyaddr(ipv4Address)[0] if socket.gethostbyaddr(ipv4Address)[0] is not None else ''
+
             item = {
                 "name": info.name,
-                "addresses": info.parsed_addresses(),
-                "type": info.type,
-                "port": info.port,
-                "domain": info.server,
-                "properties": {}
+                "hostName": hostname,
+                "domainName": info.server,
+                "addresses": {
+                    "ipv4" : ipv4Address,
+                    "ipv6": ipv6Address
+                },
+                "service": {
+                    "type": info.type, 
+                    "port": info.port,
+                    "txtRecord": {}
+                },
             }
 
             properties = {}
             for key, value in info.properties.items():
                 properties[key.decode(encoding)] = value.decode(encoding)
-            item['properties'].update(properties)
-            #servicesDiscovered.append(item)
+            item['service']['txtRecord'].update(properties)
             shelf[str(index)] = item
             servicesDiscovered.append(shelf[str(index)])
             index += 1
@@ -84,30 +95,45 @@ class ServicesRoute(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
-
-        parser.add_argument('name', required=False)
-        parser.add_argument('protocol', required=False)
+        parser.add_argument('id',required=False, type=int )
+        parser.add_argument('name', required=False, type=str)
+        parser.add_argument('replaceWildcards', required=False, type=bool)
+        parser.add_argument('serviceProtocol', required=False, type=bool)
+        parser.add_argument('protocol', required=False, type=str)
         parser.add_argument('port', required=False, type=int)
-        parser.add_argument('domain', required=False)
-        parser.add_argument('subtype', required=False)
-        parser.add_argument('properties', type=dict, required=False)
+        parser.add_argument('subtype', required=False, type=str)
+        parser.add_argument('properties', required=False, type=dict)
 
         # parse arguments into an object
         args = parser.parse_args()
 
         shelf = get_db()
-        #shelf[args['name']] = args
+        shelf[args['id']] = args
 
+        if args['serviceProtocol'].lower() == 'ipv6':
+                serviceProtocol = IPVersion.V6Only
+        elif args['serviceProtocol'].lower() == 'ipv4':
+                serviceProtocol = IPVersion.V4Only
+        else: 
+             serviceProtocol = IPVersion.V4Only
+
+        #set default name 
+        wildcardName = args.name
+
+        if (args['replaceWildcards']):
+            wildcardName = args.name + ' at ' + socket.gethostname()
+            
+        
         # handle parsing object into zeroconf service
         if args:
             new_service = ServiceInfo(
-                args.name,
+                str(wildcardName),
                 args.protocol,
                 addresses=[socket.inet_aton("127.0.0.1")],
                 port=args.port,
                 properties=args.properties,
             )
-            ip_version = IPVersion.V4Only
+            ip_version = serviceProtocol
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)
 
@@ -130,7 +156,8 @@ class ServiceRoute(Resource):
         shelf = get_db()
 
         # If the key does not exist in the data store, return a 404 error.
-        # if the key.name equals 
+        # if the key.name equals the name of the service running in thread
+        # kill the thread 
         if not (identifier in shelf):
             return {'message': 'Device not found', 'data': {}}, 404
 

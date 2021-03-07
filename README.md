@@ -1,3 +1,6 @@
+![Github Actions Pipeline](https://github.com/Frantisekf/zeroconf-service-discovery-API/actions/workflows/python-app.yml/badge.svg)
+
+
 # Zeroconf Service Discovery API
 
 This service browses the published zeroconf services in the local network of the server where the service is running and returns the results of the browse through the specified API GET endpoint. A service can be also registered by the API user through the POST method in /services endpoint.

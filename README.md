@@ -101,7 +101,6 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 `POST /services`
 ```json
 {
-     "id": 1,
      "name": "New test service._http._tcp.local.",
      "replaceWildcards": false,
      "serviceProtocol": "any",

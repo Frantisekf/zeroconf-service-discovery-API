@@ -67,27 +67,33 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 ```json
 [
   {
-    "message": "Success",
-    "services": [
+            "name": "Fran's MacBook Pro._rfb._tcp.local.",
+            "hostName": "frans-mbp.fritz.box",
+            "domainName": "Frans-MacBook-Pro.local.",
+            "addresses": {
+                "ipv4": "192.168.178.58",
+                "ipv6": "fe80::1893:e42f:9c41:1427"
+            },
+            "service": {
+                "type": "_rfb._tcp.local.",
+                "port": 5900,
+                "txtRecord": {}
+            }
+        },
         {
-            "name": "local-service._companion-link._tcp.local.",
-            "addresses": [
-                "192.168.178.58",
-                "fe80::1893:e42f:9c41:1427"
-            ],
-            "type": "_companion-link._tcp.local.",
-            "port": 59848,
-            "domain": "hostname.local.",
-            "rpHN": "0a45831c7595",
-            "rpFl": "0x20000",
-            "rpVr": "220.9",
-            "rpHA": "12addsds674b7",
-            "rpAD": "ff57c22c0db3",
-            "rpHI": "532f1596965c",
-            "rpBA": "00:4E:C2:3E:3D:11"
-        }
-    ]
-  }
+            "name": "Fran's MacBook Pro._flametouch._tcp.local.",
+            "hostName": "frans-mbp.fritz.box",
+            "domainName": "Frans-MacBook-Pro.local.",
+            "addresses": {
+                "ipv4": "192.168.178.58",
+                "ipv6": "fe80::1893:e42f:9c41:1427"
+            },
+            "service": {
+                "type": "_flametouch._tcp.local.",
+                "port": 1812,
+                "txtRecord": {}
+            }
+        },
 ]
 ```
 ### Register a service

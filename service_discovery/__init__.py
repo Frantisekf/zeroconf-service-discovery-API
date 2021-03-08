@@ -66,6 +66,7 @@ class ServicesRoute(Resource):
             index = 0
             ipv4Address = info.parsed_addresses()[0] if info.parsed_addresses()[0] is not None else ''
             ipv6Address = info.parsed_addresses()[1] if info.parsed_addresses()[1] is not None else ''
+            
             hostname = socket.gethostbyaddr(ipv4Address)[0] if socket.gethostbyaddr(ipv4Address)[0] is not None else ''
 
             item = {
@@ -95,14 +96,15 @@ class ServicesRoute(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
+        
         parser.add_argument('id',required=False, type=int )
         parser.add_argument('name', required=False, type=str)
         parser.add_argument('replaceWildcards', required=False, type=bool)
-        parser.add_argument('serviceProtocol', required=False, type=bool)
+        parser.add_argument('serviceProtocol', required=False, type=str)
         parser.add_argument('protocol', required=False, type=str)
         parser.add_argument('port', required=False, type=int)
         parser.add_argument('subtype', required=False, type=str)
-        parser.add_argument('properties', required=False, type=dict)
+        parser.add_argument('txtRecords', required=False, type=dict)
 
         # parse arguments into an object
         args = parser.parse_args()
@@ -122,17 +124,24 @@ class ServicesRoute(Resource):
 
         if (args.replaceWildcards):
             wildcardName = args.name + ' at ' + socket.gethostname()
+
+        if (args.txtRecords == None): 
+                args.txtRecords = {}
+
+        if (not args.protocol.endswith('.') or len(str(args.name)) == 0):
+                return {'code': 400, 'message': 'Bad parameter', 'data': args}, 400
+
             
-        
         # handle parsing object into zeroconf service
         if args:
             new_service = ServiceInfo(
-                args.protocol,
-                str(wildcardName),
-                addresses=[socket.inet_aton("127.0.0.1")],
-                port=args.port,
-                properties=args.properties,
-                server= socket.gethostname()
+                    args.protocol,
+                    wildcardName,
+                    addresses=[socket.inet_aton("127.0.0.1")],
+                    port=args.port,
+                    server=socket.gethostname(),
+                    properties=args.txtRecords
+                
             )
             ip_version = serviceProtocol
             zeroconf = Zeroconf(ip_version=ip_version)
@@ -160,7 +169,7 @@ class ServiceRoute(Resource):
         # if the key.name equals the name of the service running in thread
         # kill the thread 
         if not (identifier in shelf):
-            return {'message': 'Device not found', 'data': {}}, 404
+            return {'code': 404, 'message': 'Device not found', 'data': {}}, 404
 
         del shelf[identifier]
         return '', 204

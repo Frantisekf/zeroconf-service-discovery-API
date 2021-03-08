@@ -3,4 +3,4 @@ flask-restful==0.3.6
 zeroconf==0.28.8
 python-dotenv==0.15.0
 Flask-Cors==1.10.3
-Flask-Executor==0.9.4
+markdown==3.3.4

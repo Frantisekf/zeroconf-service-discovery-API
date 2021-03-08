@@ -48,7 +48,7 @@ class Collector:
 # Define the index route and display readme on the page
 @app.route("/")
 def index():
-    with open(os.path.dirname(app.root_path) + '/README.md', 'r') as markdown_file:
+    with open(os.path.dirname(app.root_path) + '/README.md') as markdown_file:
 
         readme_content = markdown_file.read()
 
@@ -110,8 +110,7 @@ class ServicesRoute(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
-        
-        parser.add_argument('id',required=False, type=int )
+
         parser.add_argument('name', required=False, type=str)
         parser.add_argument('replaceWildcards', required=False, type=bool)
         parser.add_argument('serviceProtocol', required=False, type=str)
@@ -124,14 +123,14 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         shelf = get_db()
-        shelf[str(args.id)] = args
+        shelf[str(args.name)] = args
 
         if str(args.serviceProtocol).lower() == 'ipv6':
                 service_protocol = IPVersion.V6Only
         elif str(args.serviceProtocol).lower() == 'ipv4':
                 service_protocol = IPVersion.V4Only
         else: 
-             serviceProtocol = IPVersion.V4Only
+             service_protocol = IPVersion.V4Only
 
         wildcard_name = args.name
 
@@ -158,8 +157,7 @@ class ServicesRoute(Resource):
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)
             
-        return {'message': 'Service registered', 'data': args}, 201
-
+        return {'code': 201, 'message': 'Service registered', 'data': args}, 201
 
 class ServiceRoute(Resource):
     # Get single service stored in shelf db

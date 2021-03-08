@@ -68,7 +68,6 @@ class ServicesRoute(Resource):
     def get(self):
         encoding = 'utf-8'
         shelf = get_db()
-        keys = list(shelf.keys())
 
         services_discovered = []
 

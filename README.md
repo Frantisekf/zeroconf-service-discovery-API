@@ -116,10 +116,10 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 
 
 ## TODO
-- [ ] run each published service in a separate thread
-- [ ] introduce unregister endpoint 
-- [ ] improve error handling
-- [ ] optimize usage of shelve
+- [x] run each published service in a separate thread
+- [x] introduce unregister endpoint 
+- [x] improve error handling
+- [x] optimize usage of shelve
 - [ ] Service discovery run globally
 - [ ] write tests
 - [ ] Logging 

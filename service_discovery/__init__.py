@@ -1,9 +1,10 @@
 from flask import Flask, g
-from flask.globals import request
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
 import threading
+
+
 
 from flask_cors import CORS, cross_origin
 import logging
@@ -64,8 +65,8 @@ class ServicesRoute(Resource):
         for info in collector.infos:
             
             index = 0
-            ipv4Address = info.parsed_addresses()[0] if info.parsed_addresses()[0] is not None else ''
-            ipv6Address = info.parsed_addresses()[1] if info.parsed_addresses()[1] is not None else ''
+            ipv4Address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
+            ipv6Address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
             
             hostname = socket.gethostbyaddr(ipv4Address)[0] if socket.gethostbyaddr(ipv4Address)[0] is not None else ''
 
@@ -92,7 +93,7 @@ class ServicesRoute(Resource):
             servicesDiscovered.append(shelf[str(index)])
             index += 1
             
-        return {'message': 'Success', 'services': servicesDiscovered}, 200
+        return {'services': servicesDiscovered}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -129,7 +130,7 @@ class ServicesRoute(Resource):
                 args.txtRecords = {}
 
         if (not args.protocol.endswith('.') or len(str(args.name)) == 0):
-                return {'code': 400, 'message': 'Bad parameter', 'data': args}, 400
+                return {'code': 400, 'message': 'Bad parameter in request', 'data': args}, 400
 
             
         # handle parsing object into zeroconf service
@@ -139,16 +140,14 @@ class ServicesRoute(Resource):
                     wildcardName,
                     addresses=[socket.inet_aton("127.0.0.1")],
                     port=args.port,
-                    server=socket.gethostname(),
+                    server=str(socket.gethostname() + '.'),
                     properties=args.txtRecords
                 
             )
             ip_version = serviceProtocol
             zeroconf = Zeroconf(ip_version=ip_version)
             zeroconf.register_service(new_service)
-
-            # add id as a key to service and store in db
-
+            
         return {'message': 'Service registered', 'data': args}, 201
 
 

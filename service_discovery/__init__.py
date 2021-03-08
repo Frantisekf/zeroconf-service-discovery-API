@@ -102,7 +102,7 @@ class ServicesRoute(Resource):
         parser.add_argument('name', required=False, type=str)
         parser.add_argument('replaceWildcards', required=False, type=bool)
         parser.add_argument('serviceProtocol', required=False, type=str)
-        parser.add_argument('protocol', required=False, type=str)
+        parser.add_argument('type', required=False, type=str)
         parser.add_argument('port', required=False, type=int)
         parser.add_argument('subtype', required=False, type=str)
         parser.add_argument('txtRecords', required=False, type=dict)
@@ -124,19 +124,19 @@ class ServicesRoute(Resource):
         wildcardName = args.name
 
         if (args.replaceWildcards):
-            wildcardName = args.name + ' at ' + socket.gethostname()
+            wildcardName = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + args.type
 
         if (args.txtRecords == None): 
                 args.txtRecords = {}
 
-        if (not args.protocol.endswith('.') or len(str(args.name)) == 0):
+        if (not args.type.endswith('.') or len(str(args.name)) == 0):
                 return {'code': 400, 'message': 'Bad parameter in request', 'data': args}, 400
 
             
         # handle parsing object into zeroconf service
         if args:
             new_service = ServiceInfo(
-                    args.protocol,
+                    args.type,
                     wildcardName,
                     addresses=[socket.inet_aton("127.0.0.1")],
                     port=args.port,

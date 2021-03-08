@@ -94,13 +94,13 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 
 `POST /services`
 ```json
-"data": {
-    "name": "new service._http._tcp.local.",
-        "protocol": "_http._tcp.local.",
-        "type": "tcp",
-        "port": "7790",
-        "domain": "domain.local.",
-        "subtype": null
+{
+     "id": 1,
+     "name": "New test service._http._tcp.local.",
+     "replaceWildcards": false,
+     "serviceProtocol": "any",
+     "protocol": "_http._tcp.local.",
+     "port": 7790
 }
 
 ```

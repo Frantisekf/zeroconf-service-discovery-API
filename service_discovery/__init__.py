@@ -45,6 +45,13 @@ class Collector:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.append(info) 
 
+
+def getHostnameByAddress(addr):
+     try:
+        return socket.gethostbyaddr(addr)
+     except socket.herror:
+        return None, None, None
+
 # Define the index route and display readme on the page
 @app.route("/")
 def index():
@@ -77,10 +84,10 @@ class ServicesRoute(Resource):
         index = 0
         for info in collector.infos:
             
-            ipv4Address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
-            ipv6Address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
+            ipv4_address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
+            ipv6_address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
             
-            hostname = socket.gethostbyaddr(ipv4Address)[0] if socket.gethostbyaddr(ipv4Address)[0] is not None else ''
+            hostname = getHostnameByAddress(ipv4_address)[0] if getHostnameByAddress(ipv4_address)[0:] else '' 
 
             # parse discovery results into a serializable object
             item = {
@@ -88,8 +95,8 @@ class ServicesRoute(Resource):
                 "hostName": hostname,
                 "domainName": info.server,
                 "addresses": {
-                    "ipv4" : ipv4Address,
-                    "ipv6": ipv6Address
+                    "ipv4" : ipv4_address,
+                    "ipv6": ipv6_address
                 },
                 "service": {
                     "type": info.type, 
@@ -99,8 +106,10 @@ class ServicesRoute(Resource):
             }
 
             properties = {}
+
             for key, value in info.properties.items():
                 properties[key.decode(encoding)] = value.decode(encoding)
+            
             item['service']['txtRecord'].update(properties)
             shelf[str(index)] = item
             services_discovered.append(shelf[str(index)])

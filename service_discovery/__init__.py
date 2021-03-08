@@ -108,11 +108,11 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         shelf = get_db()
-        shelf[args['id']] = args
+        shelf[str(args.id)] = args
 
-        if args['serviceProtocol'].lower() == 'ipv6':
+        if str(args.serviceProtocol).lower() == 'ipv6':
                 serviceProtocol = IPVersion.V6Only
-        elif args['serviceProtocol'].lower() == 'ipv4':
+        elif str(args.serviceProtocol).lower() == 'ipv4':
                 serviceProtocol = IPVersion.V4Only
         else: 
              serviceProtocol = IPVersion.V4Only
@@ -120,18 +120,19 @@ class ServicesRoute(Resource):
         #set default name 
         wildcardName = args.name
 
-        if (args['replaceWildcards']):
+        if (args.replaceWildcards):
             wildcardName = args.name + ' at ' + socket.gethostname()
             
         
         # handle parsing object into zeroconf service
         if args:
             new_service = ServiceInfo(
-                str(wildcardName),
                 args.protocol,
+                str(wildcardName),
                 addresses=[socket.inet_aton("127.0.0.1")],
                 port=args.port,
                 properties=args.properties,
+                server= socket.gethostname()
             )
             ip_version = serviceProtocol
             zeroconf = Zeroconf(ip_version=ip_version)

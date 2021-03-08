@@ -133,6 +133,8 @@ class ServicesRoute(Resource):
         shelf = get_db()
         shelf[str(args.name)] = args
 
+        #handle input exceptions before parsing the input into zeroconf service
+
         if str(args.serviceProtocol).lower() == 'ipv6':
                 service_protocol = IPVersion.V6Only
         elif str(args.serviceProtocol).lower() == 'ipv4':
@@ -147,10 +149,28 @@ class ServicesRoute(Resource):
 
         if (args.txtRecords == None): 
                 args.txtRecords = {}
+
+        if (not args.name):        
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong service name', 'data': args}, 400
+
+        if (not args.type):
+                return {'code': 400, 'message': 'Bad parameter in request','reason': 'type is missing', 'data': args}, 400
+        elif (not args.type.endswith('.') or len(str(args.name)) == 0):
+                return {'code': 400, 'message': 'Bad parameter in request','reason': 'wrong type format, subtype must end with "."', 'data': args}, 400
+        
+        if (not (type(args.port) == int)):
+                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'port not set', 'data': args}, 400
+
+        if (not (args.type)):
+                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'type not set', 'data': args}, 400
+ 
+        if (args.subtype):
+            if(not(args.subtype.endswith('.'))):
+                args.type + args.subtype
+            else: 
+                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'wrong subtype format, subtype must end with "." character' , 'data': args}, 400
+    
                 
-        if (not args.type.endswith('.') or len(str(args.name)) == 0):
-                return {'code': 400, 'message': 'Bad parameter in request', 'data': args}, 400
-            
         if args:
             new_service = ServiceInfo(
                     args.type,

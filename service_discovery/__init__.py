@@ -1,3 +1,4 @@
+from ipaddress import ip_address
 from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
 import socket
@@ -9,6 +10,7 @@ import logging
 from time import sleep
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
+import zeroconf
 
 # Create an instance of Flask
 app = Flask(__name__)
@@ -33,6 +35,17 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
+
+class ZeroConf:
+    def __init__(self):
+        self.zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
+
+    # using property decorator a getter function
+    @property
+    def getZeroconf(self):
+        return self.zeroconf
+
+
 # Declare Collector object which runs the service discovery browser
 class Collector:
     def __init__(self):
@@ -45,12 +58,66 @@ class Collector:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.append(info) 
 
+def serviceToOutput(info, index):
+    encoding = 'utf-8'
+    ipv4_address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
+    ipv6_address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
+            
+    hostname = getHostnameByAddress(ipv4_address)[0] if getHostnameByAddress(ipv4_address)[0:] else '' 
+    service = {
+        "id": index,
+        "name": info.name,
+        "hostName": hostname,
+        "domainName": info.server,
+        "addresses": {
+            "ipv4" : ipv4_address,
+            "ipv6": ipv6_address
+        },
+        "service": {
+            "type": info.type, 
+                    "port": info.port,
+                    "txtRecord": {}
+                },
+            }
+
+    properties = {}
+
+    for key, value in info.properties.items():
+        properties[key.decode(encoding)] = value.decode(encoding)
+            
+    service['service']['txtRecord'].update(properties)
+
+    return service
 
 def getHostnameByAddress(addr):
      try:
         return socket.gethostbyaddr(addr)
      except socket.herror:
         return None, None, None
+
+@app.before_first_request
+def selfRegister():
+    shelf = get_db()
+    shelf.clear()
+
+    props = {
+            'get': '/v1/zeroconf',
+            'post' : '/v1/zeroconf'
+           }
+
+    service = ServiceInfo(
+        "_http._tcp.local.",
+        "ZeroConf API._http._tcp.local.",
+        addresses=[socket.inet_aton("127.0.0.1")],
+        port=5000,
+        properties=props,
+        server=str(socket.gethostname() + '.'),
+    )
+
+    # always store self at 0 index
+    shelf['0'] = service
+    zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
+    zeroconf.register_service(service)                
 
 # Define the index route and display readme on the page
 @app.route("/")
@@ -66,53 +133,30 @@ class ServicesRoute(Resource):
     logging.basicConfig(level=logging.DEBUG)
 
     def get(self):
-        encoding = 'utf-8'
         shelf = get_db()
+        keys = list(shelf.keys())
+
+        #zeroconf = ZeroConf()
+        #zeroconf.getZeroconf()
 
         services_discovered = []
 
         ip_version = IPVersion.V4Only
         zeroconf = Zeroconf(ip_version=ip_version)
 
-        services = list(ZeroconfServiceTypes.find(zc=zeroconf))
+        services = list(ZeroconfServiceTypes.find(zc= zeroconf))
 
         collector = Collector()
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
         sleep(1)
+    
 
-        index = 0
+        index = 1
         for info in collector.infos:
-            
-            ipv4_address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
-            ipv6_address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
-            
-            hostname = getHostnameByAddress(ipv4_address)[0] if getHostnameByAddress(ipv4_address)[0:] else '' 
-
-            # parse discovery results into a serializable object
-            item = {
-                "name": info.name,
-                "hostName": hostname,
-                "domainName": info.server,
-                "addresses": {
-                    "ipv4" : ipv4_address,
-                    "ipv6": ipv6_address
-                },
-                "service": {
-                    "type": info.type, 
-                    "port": info.port,
-                    "txtRecord": {}
-                },
-            }
-
-            properties = {}
-
-            for key, value in info.properties.items():
-                properties[key.decode(encoding)] = value.decode(encoding)
-            
-            item['service']['txtRecord'].update(properties)
-            shelf[str(index)] = item
-            services_discovered.append(shelf[str(index)])
+            shelf[str(index)] = info
+            services_discovered.append(serviceToOutput(info, index))    
             index += 1
+            
             
         return {'services': services_discovered}, 200
 
@@ -199,15 +243,19 @@ class ServiceRoute(Resource):
     
     def delete(self, identifier):
         shelf = get_db()
+        
+        zeroconf = ZeroConf()
+        zeroconf.getZeroconf()
 
-        # If the key does not exist in the data store, return a 404 error.
-        # if the key.name equals the name of the service running in thread
-        # kill the thread 
+        print(zeroconf.getZeroconf())
+
         if not (identifier in shelf):
             return {'code': 404, 'message': 'Device not found', 'data': {}}, 404
 
-        #del shelf[identifier]
-        return {'code': 204, 'message': 'Service unregistered', 'data': {shelf[identifier]} }, 204
+        zeroconf.unregister_service(shelf[identifier])
+        del shelf[identifier]
+        
+        return {'code': 204, 'message': 'Service unregistered', 'data': identifier}, 204
 
 # Define routes
 api.add_resource(ServicesRoute, '/v1/zeroconf')

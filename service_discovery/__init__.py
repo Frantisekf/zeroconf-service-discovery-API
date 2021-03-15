@@ -100,7 +100,7 @@ def getHostnameByAddress(addr):
      except socket.herror:
         return None, None, None
 
-@app.before_first_request
+#@app.before_first_request
 def selfRegister():
     props = {
             'get': '/v1/zeroconf',
@@ -237,7 +237,7 @@ class ServiceRoute(Resource):
             return {'message': 'Service not found', 'service': {}}, 404
 
         return {'message': 'Service found', 'data': serviceToOutput(shelf[identifier], identifier)}, 200
-    
+
     def delete(self, identifier):
         shelf = get_db()
         
@@ -251,6 +251,16 @@ class ServiceRoute(Resource):
         
         return {'code': 204, 'message': 'Service unregistered', 'data': identifier}, 204
 
+class InitializeSelf(Resource):
+    def post(self):
+        selfRegister()
+
+        return {'code': 201, 'message': 'ZeroConf API published as a service'}, 201
+
+
+
 # Define routes
 api.add_resource(ServicesRoute, '/v1/zeroconf')
 api.add_resource(ServiceRoute, '/v1/zeroconf/<string:identifier>')
+
+api.add_resource(InitializeSelf,'/v1/zeroconf/publishself')

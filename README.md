@@ -21,9 +21,6 @@ Compatible with:
 To deploy the Zeroconf service/API on a device such as Rpi. make sure you have avahi installed on the device
 1. Run the launcher.sh script by running `sh launcher.sh`.
 
-   This will set the launch of the API/Zeroconf service on the start of the system.
-2. Run `sudo sh setup-avahi-service.sh` to publish the API as a zeroconf service in the local network.   
-
 
 Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env` file
 

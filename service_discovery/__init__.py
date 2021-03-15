@@ -6,10 +6,12 @@ import socket
 import shelve
 import markdown
 import os
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import logging
 from time import sleep
 from dotenv import load_dotenv
+import re
+
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
 
@@ -63,11 +65,29 @@ class Collector:
             self.infos.append(info) 
 
 
+def parseIPv4Addresses(addresses):
+    ipv4_list = []
+    for i in range(len(addresses)):
+        if (re.match('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$',addresses[i])):
+            ipv4_list.append(addresses[i])
+        
+    return ipv4_list
+
+def parseIPv6Addresses(addresses):
+    ipv6_list = []
+    for i in range(len(addresses)):
+        if (re.match('([a-f0-9:]+:+)+[a-f0-9]+',addresses[i])):
+            ipv6_list.append(addresses[i])
+        
+    return ipv6_list    
+
 def serviceToOutput(info, index):
     encoding = 'utf-8'
     ipv4_address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
-    ipv6_address = info.parsed_addresses()[1] if info.parsed_addresses()[1:] else ''
-            
+
+    ipv4_list = parseIPv4Addresses(info.parsed_addresses())
+    ipv6_list = parseIPv6Addresses(info.parsed_addresses())
+
     hostname = getHostnameByAddress(ipv4_address)[0] if getHostnameByAddress(ipv4_address)[0:] else '' 
     service = {
         "id": index,
@@ -75,8 +95,8 @@ def serviceToOutput(info, index):
         "hostName": hostname,
         "domainName": info.server,
         "addresses": {
-            "ipv4" : ipv4_address,
-            "ipv6": ipv6_address
+            "ipv4" : ipv4_list,
+            "ipv6": ipv6_list
         },
         "service": {
             "type": info.type, 
@@ -137,9 +157,6 @@ class ServicesRoute(Resource):
         # keys = list(shelf.keys())
 
         zeroconf = zeroconfGlobal.getZeroconf
-
-        print(zeroconf)
-
         services_discovered = []
 
         services = list(ZeroconfServiceTypes.find(zc= zeroconf))
@@ -258,9 +275,8 @@ class InitializeSelf(Resource):
         return {'code': 201, 'message': 'ZeroConf API published as a service'}, 201
 
 
-
 # Define routes
 api.add_resource(ServicesRoute, '/v1/zeroconf')
 api.add_resource(ServiceRoute, '/v1/zeroconf/<string:identifier>')
 
-api.add_resource(InitializeSelf,'/v1/zeroconf/publishself')
+api.add_resource(InitializeSelf,'/v1/zeroconf/init')

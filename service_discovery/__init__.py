@@ -230,14 +230,13 @@ class ServicesRoute(Resource):
         return {'code': 201, 'message': 'Service registered', 'data': args}, 201
 
 class ServiceRoute(Resource):
-    # Get single service stored in shelf db
     def get(self, identifier):
         shelf = get_db()
 
         if not (identifier in shelf):
             return {'message': 'Service not found', 'service': {}}, 404
 
-        return {'message': 'Service found', 'data': shelf[identifier]}, 200
+        return {'message': 'Service found', 'data': serviceToOutput(shelf[identifier], identifier)}, 200
     
     def delete(self, identifier):
         shelf = get_db()

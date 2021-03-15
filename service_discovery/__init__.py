@@ -1,5 +1,6 @@
 from ipaddress import ip_address
 from flask import Flask, g
+from flask.globals import session
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
@@ -8,6 +9,7 @@ import os
 from flask_cors import CORS, cross_origin
 import logging
 from time import sleep
+
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
 import zeroconf
@@ -44,6 +46,8 @@ class ZeroConf:
     def getZeroconf(self):
         return self.zeroconf
 
+# instantiate global zeroconf object
+zeroconfGlobal = ZeroConf()        
 
 # Declare Collector object which runs the service discovery browser
 class Collector:
@@ -114,7 +118,7 @@ def selfRegister():
         server=str(socket.gethostname() + '.'),
     )
     
-    zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
+    zeroconf = zeroconfGlobal.getZeroconf
     zeroconf.register_service(service)                
 
 # Define the index route and display readme on the page
@@ -132,21 +136,18 @@ class ServicesRoute(Resource):
 
     def get(self):
         shelf = get_db()
-        keys = list(shelf.keys())
+        # keys = list(shelf.keys())
 
-        zeroconf = ZeroConf()
-        zeroconfObj = zeroconf.getZeroconf
-        print(zeroconfObj)
+        zeroconf = zeroconfGlobal.getZeroconf
+
+        print(zeroconf)
 
         services_discovered = []
 
-        #ip_version = IPVersion.V4Only
-        #zeroconf = Zeroconf(ip_version=ip_version)
-
-        services = list(ZeroconfServiceTypes.find(zc= zeroconfObj))
+        services = list(ZeroconfServiceTypes.find(zc= zeroconf))
 
         collector = Collector()
-        browser = ServiceBrowser(zeroconfObj, services, handlers=[collector.on_service_state_change])
+        browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
         sleep(1)
     
 
@@ -243,17 +244,13 @@ class ServiceRoute(Resource):
     def delete(self, identifier):
         shelf = get_db()
         
-        zeroconf = ZeroConf()
-        zeroconfObj = zeroconf.getZeroconf
-
-        print(zeroconfObj)
+        zeroconf = zeroconfGlobal.getZeroconf
 
         if not (identifier in shelf):
             return {'code': 404, 'message': 'Device not found', 'data': {}}, 404
 
-        #zeroconfObj.unregister_service(shelf[identifier])
-        #del shelf[identifier]
-        print(shelf[identifier])
+        zeroconf.unregister_service(shelf[identifier])
+        del shelf[identifier]
         
         return {'code': 204, 'message': 'Service unregistered', 'data': identifier}, 204
 

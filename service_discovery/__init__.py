@@ -9,10 +9,11 @@ import os
 from flask_cors import CORS, cross_origin
 import logging
 from time import sleep
-
+from dotenv import load_dotenv
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
-import zeroconf
+
+load_dotenv()
 
 # Create an instance of Flask
 app = Flask(__name__)
@@ -101,9 +102,6 @@ def getHostnameByAddress(addr):
 
 @app.before_first_request
 def selfRegister():
-    shelf = get_db()
-    shelf.clear()
-
     props = {
             'get': '/v1/zeroconf',
             'post' : '/v1/zeroconf'
@@ -113,7 +111,7 @@ def selfRegister():
         "_http._tcp.local.",
         "ZeroConf API._http._tcp.local.",
         addresses=[socket.inet_aton("127.0.0.1")],
-        port=5000,
+        port=int(os.getenv('PORT')),
         properties=props,
         server=str(socket.gethostname() + '.'),
     )

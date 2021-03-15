@@ -119,7 +119,6 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 - [x] introduce unregister endpoint 
 - [x] improve error handling
 - [x] optimize usage of shelve
-- [ ] Service discovery run globally
 - [ ] write tests
 - [ ] Logging 
 

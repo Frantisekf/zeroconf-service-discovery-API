@@ -215,7 +215,7 @@ class ServicesRoute(Resource):
     
 
         for key in keys:
-            if (args.name == shelf[key].name):
+            if (wildcard_name == shelf[key].name):
                 return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
 
         if args:

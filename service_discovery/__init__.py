@@ -1,6 +1,4 @@
-from ipaddress import ip_address
 from flask import Flask, g
-from flask.globals import session
 from flask_restful import Resource, Api, reqparse
 import socket
 import shelve
@@ -11,9 +9,10 @@ import logging
 from time import sleep
 from dotenv import load_dotenv
 import re
+import uuid
 
 
-from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, ServiceStateChange, Zeroconf, ZeroconfServiceTypes
+from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, Zeroconf, ServiceStateChange, ZeroconfServiceTypes
 
 load_dotenv()
 
@@ -40,7 +39,10 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
-
+def clear_db(shelf):
+    for key in shelf.keys():
+        del shelf[key]
+       
 class ZeroConf:
     def __init__(self):
         self.zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
@@ -119,26 +121,7 @@ def getHostnameByAddress(addr):
         return socket.gethostbyaddr(addr)
      except socket.herror:
         return None, None, None
-
-#@app.before_first_request
-def selfRegister():
-    props = {
-            'get': '/v1/zeroconf',
-            'post' : '/v1/zeroconf'
-           }
-
-    service = ServiceInfo(
-        "_http._tcp.local.",
-        "ZeroConf API._http._tcp.local.",
-        addresses=[socket.inet_aton("127.0.0.1")],
-        port=int(os.getenv('PORT')),
-        properties=props,
-        server=str(socket.gethostname() + '.'),
-    )
-    
-    zeroconf = zeroconfGlobal.getZeroconf
-    zeroconf.register_service(service)                
-
+            
 # Define the index route and display readme on the page
 @app.route("/")
 def index():
@@ -154,7 +137,7 @@ class ServicesRoute(Resource):
 
     def get(self):
         shelf = get_db()
-        # keys = list(shelf.keys())
+        keys = list(shelf.keys())
 
         zeroconf = zeroconfGlobal.getZeroconf
         services_discovered = []
@@ -165,12 +148,10 @@ class ServicesRoute(Resource):
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
         sleep(1)
     
-
-        index = 1
         for info in collector.infos:
-            shelf[str(index)] = info
-            services_discovered.append(serviceToOutput(info, index))    
-            index += 1
+            unique_id = str(uuid.uuid4())
+            shelf[unique_id] = info
+            services_discovered.append(serviceToOutput(info, unique_id))    
             
             
         return {'services': services_discovered}, 200
@@ -178,6 +159,7 @@ class ServicesRoute(Resource):
     def post(self):
         parser = reqparse.RequestParser()
 
+        parser.add_argument('id', required=False, type=str)
         parser.add_argument('name', required=False, type=str)
         parser.add_argument('replaceWildcards', required=False, type=bool)
         parser.add_argument('serviceProtocol', required=False, type=str)
@@ -190,21 +172,18 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         shelf = get_db()
-        shelf[str(args.name)] = args
+        keys = list(shelf.keys())
 
-        #handle input exceptions before parsing the input into zeroconf service
+        # handle input exceptions before parsing the input into zeroconf service
 
-        if str(args.serviceProtocol).lower() == 'ipv6':
-                service_protocol = IPVersion.V6Only
-        elif str(args.serviceProtocol).lower() == 'ipv4':
-                service_protocol = IPVersion.V4Only
-        else: 
-             service_protocol = IPVersion.V4Only
+        # if str(args.serviceProtocol).lower() == 'ipv6':
+        #      service_protocol = IPVersion.V6Only
+        #elif str(args.serviceProtocol).lower() == 'ipv4':
+        #       service_protocol = IPVersion.V4Only
+        #else: 
+        #    service_protocol = IPVersion.V4Only
 
         wildcard_name = args.name
-
-        if (args.replaceWildcards):
-            wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + args.type
 
         if (args.txtRecords == None): 
                 args.txtRecords = {}
@@ -241,7 +220,10 @@ class ServicesRoute(Resource):
                 
             )
             ip_version = service_protocol
-            zeroconf = Zeroconf(ip_version=ip_version)
+            unique_id = str(uuid.uuid4())
+            shelf[unique_id] = new_service
+
+            zeroconf = zeroconfGlobal.getZeroconf
             zeroconf.register_service(new_service)
             
         return {'code': 201, 'message': 'Service registered', 'data': args}, 201
@@ -268,15 +250,7 @@ class ServiceRoute(Resource):
         
         return {'code': 204, 'message': 'Service unregistered', 'data': identifier}, 204
 
-class InitializeSelf(Resource):
-    def post(self):
-        selfRegister()
-
-        return {'code': 201, 'message': 'ZeroConf API published as a service'}, 201
-
 
 # Define routes
 api.add_resource(ServicesRoute, '/v1/zeroconf')
 api.add_resource(ServiceRoute, '/v1/zeroconf/<string:identifier>')
-
-api.add_resource(InitializeSelf,'/v1/zeroconf/init')

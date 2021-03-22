@@ -213,7 +213,11 @@ class ServicesRoute(Resource):
             else: 
                 return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'wrong subtype format, subtype must end with "." character' , 'data': args}, 400
     
-                
+
+        for key in keys:
+            if (args.name == shelf[key].name):
+                return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
+
         if args:
             new_service = ServiceInfo(
                     args.type,

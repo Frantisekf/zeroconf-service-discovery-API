@@ -183,7 +183,12 @@ class ServicesRoute(Resource):
         #else: 
         #    service_protocol = IPVersion.V4Only
 
+        #set default name 
         wildcard_name = args.name
+
+        if (args.replaceWildcards):
+            wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + args.type
+
 
         if (args.txtRecords == None): 
                 args.txtRecords = {}
@@ -219,7 +224,6 @@ class ServicesRoute(Resource):
                     properties=args.txtRecords
                 
             )
-            ip_version = service_protocol
             unique_id = str(uuid.uuid4())
             shelf[unique_id] = new_service
 

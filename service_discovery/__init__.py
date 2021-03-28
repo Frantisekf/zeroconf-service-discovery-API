@@ -6,11 +6,9 @@ import markdown
 import os
 from flask_cors import CORS
 import logging
-from time import sleep
 from dotenv import load_dotenv
 import re
 import uuid
-
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, Zeroconf, ServiceStateChange, ZeroconfServiceTypes
 
@@ -50,9 +48,7 @@ class ZeroConf:
     @property
     def getZeroconf(self):
         return self.zeroconf
-
-# instantiate global zeroconf object
-zeroconfGlobal = ZeroConf()        
+  
 
 # Declare Collector object which runs the service discovery browser
 class Collector:
@@ -67,10 +63,22 @@ class Collector:
             self.infos.append(info) 
 
 
+# initialize all browser related objects as global objects.
+# this way they can all be initized during the startup
+# and 
+# instantiate global zeroconf object
+zeroconfGlobal = ZeroConf()      
+
+collector = Collector()
+zeroconf = zeroconfGlobal.getZeroconf
+services = list(ZeroconfServiceTypes.find(zc= zeroconf))
+browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
+
+
 def parseIPv4Addresses(addresses):
     ipv4_list = []
     for i in range(len(addresses)):
-        if (re.match('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$',addresses[i])):
+        if (re.match('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', addresses[i])):
             ipv4_list.append(addresses[i])
         
     return ipv4_list
@@ -78,32 +86,33 @@ def parseIPv4Addresses(addresses):
 def parseIPv6Addresses(addresses):
     ipv6_list = []
     for i in range(len(addresses)):
-        if (re.match('([a-f0-9:]+:+)+[a-f0-9]+',addresses[i])):
+        if (re.match('([a-f0-9:]+:+)+[a-f0-9]+', addresses[i])):
             ipv6_list.append(addresses[i])
         
     return ipv6_list    
 
 def serviceToOutput(info, index):
     encoding = 'utf-8'
-    ipv4_address = info.parsed_addresses()[0] if info.parsed_addresses()[0:] else ''
-
     ipv4_list = parseIPv4Addresses(info.parsed_addresses())
     ipv6_list = parseIPv6Addresses(info.parsed_addresses())
 
-    hostname = getHostnameByAddress(ipv4_address)[0] if getHostnameByAddress(ipv4_address)[0:] else '' 
+    # split by . last element is an empty space
+    domain = info.server.split('.')   
+    domain.reverse()
+
     service = {
         "id": index,
         "name": info.name,
-        "hostName": hostname,
-        "domainName": info.server,
+        "hostName": info.server,
+        "domainName": domain[1] + '.',
         "addresses": {
-            "ipv4" : ipv4_list,
+            "ipv4": ipv4_list,
             "ipv6": ipv6_list
         },
         "service": {
             "type": info.type, 
-                    "port": info.port,
-                    "txtRecord": {}
+            "port": info.port,
+            "txtRecord": {}
                 },
         }
 
@@ -116,12 +125,6 @@ def serviceToOutput(info, index):
 
     return service
 
-def getHostnameByAddress(addr):
-     try:
-        return socket.gethostbyaddr(addr)
-     except socket.herror:
-        return None, None, None
-            
 # Define the index route and display readme on the page
 @app.route("/")
 def index():
@@ -137,22 +140,13 @@ class ServicesRoute(Resource):
 
     def get(self):
         shelf = get_db()
-        keys = list(shelf.keys())
-
-        zeroconf = zeroconfGlobal.getZeroconf
         services_discovered = []
+        # keys = list(shelf.keys())
 
-        services = list(ZeroconfServiceTypes.find(zc= zeroconf))
-
-        collector = Collector()
-        browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-        sleep(1)
-    
         for info in collector.infos:
             unique_id = str(uuid.uuid4())
             shelf[unique_id] = info
             services_discovered.append(serviceToOutput(info, unique_id))    
-            
             
         return {'services': services_discovered}, 200
 
@@ -247,7 +241,6 @@ class ServiceRoute(Resource):
 
     def delete(self, identifier):
         shelf = get_db()
-        
         zeroconf = zeroconfGlobal.getZeroconf
 
         if not (identifier in shelf):

@@ -159,55 +159,55 @@ class ServicesRoute(Resource):
         
         keys = list(shelf.keys())
 
-        parser.add_argument('name', required=False, type=str)
+        parser.add_argument('name', required=True, type=str)
         parser.add_argument('replaceWildcards', required=False, type=bool)
         parser.add_argument('serviceProtocol', required=False, type=str)
-        parser.add_argument('type', required=False, type=str)
-        parser.add_argument('port', required=False, type=int)
-        parser.add_argument('subtype', required=False, type=str)
-        parser.add_argument('txtRecords', required=False, type=dict)
+        parser.add_argument('service', required=True, type=dict)
+
+        nested_service = reqparse.RequestParser()
+        nested_service.add_argument('type', required=True, type=str, location='json')
+        nested_service.add_argument('port', required=True, type=int, location='json')
+        nested_service.add_argument('subtype', required=False, type=str, location='json')
+        nested_service.add_argument('txtRecords', required=False, type=dict, location='json')
 
         # parse arguments into an object
         args = parser.parse_args()
 
         wildcard_name = args.name
-        parsedType = args.type
-
+        parsedType = args.service['type']
+        print(args)
         for key in keys:
             if (wildcard_name == shelf[key].name):
                 return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
 
-        if (args.subtype is not None):
-            parsedType = args.subtype + 'local.'
+        if ('subtype' in args.service):
+            parsedType = args.service['subtype'] + 'local.'
 
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-        if (args.txtRecords is None): 
-            args.txtRecords = {}
+        if (args.service['txtRecords'] is not None): 
+            args.service['txtRecords'] = {}
 
         if (not args.name):        
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong service name', 'data': args}, 400
 
-        if (not args.type):
+        if (not args.service['type']):
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'type is missing', 'data': args}, 400
-        elif (not args.type.endswith('.') or len(str(args.name)) == 0):
+        elif (not args.service['type'].endswith('.') or len(str(args.name)) == 0):
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': "wrong type format, subtype must end with '.'", 'data': args}, 400
         
-        if (not (type(args.port) == int)):
+        if (not (type(args.service['port']) == int)):
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'port not set', 'data': args}, 400
-
-        if (not (args.type)):
-            return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'type not set', 'data': args}, 400
  
         if args:
             new_service = ServiceInfo(
                     parsedType,
                     wildcard_name,
                     addresses=[socket.inet_aton("127.0.0.1")],
-                    port=args.port,
+                    port=args.service['port'],
                     server=str(socket.gethostname() + '.'),
-                    properties=args.txtRecords
+                    properties=args.service['txtRecords']
                 
             )
             zeroconf = zeroconfGlobal.getZeroconf
@@ -216,6 +216,7 @@ class ServicesRoute(Resource):
             zeroconf.register_service(new_service)
             
         return {'code': 201, 'message': 'Service registered', 'data': args}, 201
+
 
 class ServiceRoute(Resource):
     def get(self, identifier):
@@ -238,7 +239,6 @@ class ServiceRoute(Resource):
         del shelf[identifier]
         
         return '', 204
-
 
 
 # Define routes

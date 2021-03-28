@@ -135,7 +135,6 @@ class ServicesRoute(Resource):
     def get(self):
         shelf = get_db()
         services_discovered = []
-        # keys = list(shelf.keys())
         shelf.clear()
 
         zeroconf = zeroconfGlobal.getZeroconf
@@ -174,19 +173,20 @@ class ServicesRoute(Resource):
         wildcard_name = args.name
         parsedType = args.type
 
+        print(keys)
+
         for key in keys:
-            if (args.name == shelf[key].name):
-                print(args.name == shelf[key].name)
+            print(shelf[key])
+            if (wildcard_name == shelf[key].name):
+                print(wildcard_name == shelf[key].name)
                 return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
 
         if (args.subtype is not None):
             parsedType = args.subtype + 'local.'
-            print(parsedType)
 
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-
         if (args.txtRecords is None): 
             args.txtRecords = {}
 
@@ -215,6 +215,8 @@ class ServicesRoute(Resource):
                 
             )
             zeroconf = zeroconfGlobal.getZeroconf
+            unique_id = str(uuid.uuid4())
+            shelf[unique_id] = new_service
             zeroconf.register_service(new_service)
             
         return {'code': 201, 'message': 'Service registered', 'data': args}, 201
@@ -237,7 +239,7 @@ class ServiceRoute(Resource):
             return {'code': 404, 'message': 'Device not found', 'data': {}}, 404
 
         zeroconf.unregister_service(shelf[identifier])
-        # del shelf[identifier]
+        del shelf[identifier]
         
         return '', 204
 

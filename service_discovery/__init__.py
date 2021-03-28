@@ -173,12 +173,8 @@ class ServicesRoute(Resource):
         wildcard_name = args.name
         parsedType = args.type
 
-        print(keys)
-
         for key in keys:
-            print(shelf[key])
             if (wildcard_name == shelf[key].name):
-                print(wildcard_name == shelf[key].name)
                 return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
 
         if (args.subtype is not None):

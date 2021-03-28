@@ -9,6 +9,7 @@ import logging
 from dotenv import load_dotenv
 import re
 import uuid
+from time import sleep
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, Zeroconf, ServiceStateChange, ZeroconfServiceTypes
 
@@ -50,6 +51,11 @@ class ZeroConf:
         return self.zeroconf
 
 
+# initialize all browser related objects as global objects.
+# this way they can all be initized during the startup
+# instantiate global zeroconf object
+zeroconfGlobal = ZeroConf()    
+
 # Declare Collector object which runs the service discovery browser
 class Collector:
     def __init__(self):
@@ -62,17 +68,7 @@ class Collector:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.append(info) 
 
-
-# initialize all browser related objects as global objects.
-# this way they can all be initized during the startup
-# instantiate global zeroconf object
-zeroconfGlobal = ZeroConf()      
-
-collector = Collector()
-zeroconf = zeroconfGlobal.getZeroconf
-services = list(ZeroconfServiceTypes.find(zc= zeroconf))
-browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-
+  
 
 def parseIPv4Addresses(addresses):
     ipv4_list = []
@@ -141,6 +137,15 @@ class ServicesRoute(Resource):
         services_discovered = []
         # keys = list(shelf.keys())
         shelf.clear()
+
+        zeroconf = zeroconfGlobal.getZeroconf
+        services_discovered = []
+
+        services = list(ZeroconfServiceTypes.find(zc= zeroconf))
+
+        collector = Collector()
+        browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
+        sleep(1)
 
         for info in collector.infos:
             unique_id = str(uuid.uuid4())
@@ -236,9 +241,10 @@ class ServiceRoute(Resource):
             return {'code': 404, 'message': 'Device not found', 'data': {}}, 404
 
         zeroconf.unregister_service(shelf[identifier])
-        del shelf[identifier]
+        # del shelf[identifier]
         
         return {'code': 204, 'message': 'Service unregistered'}, 204
+
 
 
 # Define routes

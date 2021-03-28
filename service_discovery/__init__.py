@@ -243,7 +243,7 @@ class ServiceRoute(Resource):
         zeroconf.unregister_service(shelf[identifier])
         # del shelf[identifier]
         
-        return {'code': 204, 'message': 'Service unregistered'}, 204
+        return '', 204
 
 
 

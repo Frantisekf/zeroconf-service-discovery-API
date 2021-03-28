@@ -48,7 +48,7 @@ class ZeroConf:
     @property
     def getZeroconf(self):
         return self.zeroconf
-  
+
 
 # Declare Collector object which runs the service discovery browser
 class Collector:
@@ -65,7 +65,6 @@ class Collector:
 
 # initialize all browser related objects as global objects.
 # this way they can all be initized during the startup
-# and 
 # instantiate global zeroconf object
 zeroconfGlobal = ZeroConf()      
 
@@ -80,7 +79,7 @@ def parseIPv4Addresses(addresses):
     for i in range(len(addresses)):
         if (re.match('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', addresses[i])):
             ipv4_list.append(addresses[i])
-        
+
     return ipv4_list
 
 def parseIPv6Addresses(addresses):
@@ -88,8 +87,8 @@ def parseIPv6Addresses(addresses):
     for i in range(len(addresses)):
         if (re.match('([a-f0-9:]+:+)+[a-f0-9]+', addresses[i])):
             ipv6_list.append(addresses[i])
-        
-    return ipv6_list    
+    
+    return ipv6_list
 
 def serviceToOutput(info, index):
     encoding = 'utf-8'
@@ -131,7 +130,6 @@ def index():
     with open(os.path.dirname(app.root_path) + '/README.md') as markdown_file:
 
         readme_content = markdown_file.read()
-
         return markdown.markdown(readme_content)
 
 
@@ -142,6 +140,7 @@ class ServicesRoute(Resource):
         shelf = get_db()
         services_discovered = []
         # keys = list(shelf.keys())
+        shelf.clear()
 
         for info in collector.infos:
             unique_id = str(uuid.uuid4())
@@ -152,6 +151,9 @@ class ServicesRoute(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
+        shelf = get_db()
+        
+        keys = list(shelf.keys())
 
         parser.add_argument('id', required=False, type=str)
         parser.add_argument('name', required=False, type=str)
@@ -165,19 +167,6 @@ class ServicesRoute(Resource):
         # parse arguments into an object
         args = parser.parse_args()
 
-        shelf = get_db()
-        keys = list(shelf.keys())
-
-        # handle input exceptions before parsing the input into zeroconf service
-
-        # if str(args.serviceProtocol).lower() == 'ipv6':
-        #      service_protocol = IPVersion.V6Only
-        #elif str(args.serviceProtocol).lower() == 'ipv4':
-        #       service_protocol = IPVersion.V4Only
-        #else: 
-        #    service_protocol = IPVersion.V4Only
-
-        #set default name 
         wildcard_name = args.name
 
         if (args.replaceWildcards):
@@ -191,25 +180,27 @@ class ServicesRoute(Resource):
                 return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong service name', 'data': args}, 400
 
         if (not args.type):
-                return {'code': 400, 'message': 'Bad parameter in request','reason': 'type is missing', 'data': args}, 400
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'type is missing', 'data': args}, 400
         elif (not args.type.endswith('.') or len(str(args.name)) == 0):
-                return {'code': 400, 'message': 'Bad parameter in request','reason': 'wrong type format, subtype must end with "."', 'data': args}, 400
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong type format, subtype must end with "."', 'data': args}, 400
         
         if (not (type(args.port) == int)):
-                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'port not set', 'data': args}, 400
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'port not set', 'data': args}, 400
 
         if (not (args.type)):
-                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'type not set', 'data': args}, 400
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'type not set', 'data': args}, 400
  
         if (args.subtype):
             if(not(args.subtype.endswith('.'))):
                 args.type + args.subtype
             else: 
-                return {'code': 400, 'message': 'Bad parameter in request' ,'reason': 'wrong subtype format, subtype must end with "." character' , 'data': args}, 400
-    
+                return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong subtype format, subtype must end with "." character' , 'data': args}, 400
 
+
+        
         for key in keys:
-            if (wildcard_name == shelf[key].name):
+            if (args.name == shelf[key].name):
+                print(args.name == shelf[key].name)
                 return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
 
         if args:
@@ -222,9 +213,6 @@ class ServicesRoute(Resource):
                     properties=args.txtRecords
                 
             )
-            unique_id = str(uuid.uuid4())
-            shelf[unique_id] = new_service
-
             zeroconf = zeroconfGlobal.getZeroconf
             zeroconf.register_service(new_service)
             
@@ -241,6 +229,7 @@ class ServiceRoute(Resource):
 
     def delete(self, identifier):
         shelf = get_db()
+
         zeroconf = zeroconfGlobal.getZeroconf
 
         if not (identifier in shelf):
@@ -249,7 +238,7 @@ class ServiceRoute(Resource):
         zeroconf.unregister_service(shelf[identifier])
         del shelf[identifier]
         
-        return {'code': 204, 'message': 'Service unregistered', 'data': identifier}, 204
+        return {'code': 204, 'message': 'Service unregistered'}, 204
 
 
 # Define routes

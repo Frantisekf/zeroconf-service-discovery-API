@@ -8,7 +8,6 @@ from flask_cors import CORS
 import logging
 from dotenv import load_dotenv
 import re
-import uuid
 from time import sleep
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, Zeroconf, ServiceStateChange, ZeroconfServiceTypes
@@ -22,7 +21,10 @@ app = Flask(__name__)
 api = Api(app)
 
 # Set CORS policy
-CORS(app, resources={r"/*": {"origins": "*"}})
+# CORS(app, resources={r"/*": {"origins": "*"}})
+app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app)
+
 
 # Initialize shelf DB
 def get_db():
@@ -151,9 +153,8 @@ class ServicesRoute(Resource):
         sleep(1)
 
         for info in collector.infos:
-            unique_id = str(uuid.uuid4())
-            shelf[unique_id] = info
-            services_discovered.append(serviceToOutput(info, unique_id))    
+            shelf[(info.name).lower()] = info
+            services_discovered.append(serviceToOutput(info, (info.name).lower()))    
             
         return {'services': services_discovered}, 200
 
@@ -215,8 +216,8 @@ class ServicesRoute(Resource):
                 
             )
             zeroconf = zeroconfGlobal.getZeroconf
-            unique_id = str(uuid.uuid4())
-            shelf[unique_id] = new_service
+            shelf[(wildcard_name).lower()] = new_service
+
             zeroconf.register_service(new_service)
             
         return {'code': 201, 'message': 'Service registered', 'data': args}, 201
@@ -225,6 +226,7 @@ class ServicesRoute(Resource):
 class ServiceRoute(Resource):
     def get(self, identifier):
         shelf = get_db()
+        identifier = identifier.lower()
 
         if not (identifier in shelf):
             return {'message': 'Service not found', 'service': {}}, 404
@@ -234,6 +236,7 @@ class ServiceRoute(Resource):
     def delete(self, identifier):
         shelf = get_db()
 
+        identifier = identifier.lower()
         zeroconf = zeroconfGlobal.getZeroconf
 
         if not (identifier in shelf):

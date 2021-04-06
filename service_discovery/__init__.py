@@ -74,7 +74,8 @@ class Collector:
                 self.infos.append(info) 
         if state_change is ServiceStateChange.Removed:
             info = zeroconf.get_service_info(service_type, name)
-            self.infos.remove(info)
+            if info not in self.infos:
+                self.infos.remove(info)
         # TODO update
     
 collector = Collector()  

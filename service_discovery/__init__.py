@@ -56,7 +56,9 @@ class ZeroConf:
 # initialize all browser related objects as global objects.
 # this way they can all be initized during the startup
 # instantiate global zeroconf object
-zeroconfGlobal = ZeroConf()    
+zeroconfGlobal = ZeroConf()
+
+
 
 # Declare Collector object which runs the service discovery browser
 class Collector:
@@ -68,9 +70,15 @@ class Collector:
     ) -> None:
         if state_change is ServiceStateChange.Added:
             info = zeroconf.get_service_info(service_type, name)
-            self.infos.append(info) 
+            if info not in self.infos:
+                self.infos.append(info) 
+        if state_change is ServiceStateChange.Removed:
+            info = zeroconf.get_service_info(service_type, name)
+            self.infos.remove(info)
+        # TODO update
+    
+collector = Collector()  
 
-  
 
 def parseIPv4Addresses(addresses):
     ipv4_list = []
@@ -142,19 +150,17 @@ class ServicesRoute(Resource):
         zeroconf = zeroconfGlobal.getZeroconf
         services_discovered = []
 
-        # Addition by Martin Stusek
-        services = list(ZeroconfServiceTypes.find(zc= zeroconf, ip_version=IPVersion.V4Only))
-        services = [x if "local." in x else x + "local." for x in services]
+        # # Addition by Martin Stusek
+        # services = list(ZeroconfServiceTypes.find(zc= zeroconf, ip_version=IPVersion.V4Only))
+        # services = [x if "local." in x else x + "local." for x in services]
 
-        services = list(ZeroconfServiceTypes.find(zc= zeroconf))
+        services = list(ZeroconfServiceTypes.find(timeout=0.1,zc= zeroconf))
 
-        collector = Collector()
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-        sleep(1)
 
         for info in collector.infos:
-            shelf[(info.name).lower()] = info
-            services_discovered.append(serviceToOutput(info, (info.name).lower()))    
+             shelf[(info.name).lower()] = info
+             services_discovered.append(serviceToOutput(info, (info.name).lower()))    
             
         return {'services': services_discovered}, 200
 

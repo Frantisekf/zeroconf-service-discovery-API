@@ -152,16 +152,15 @@ class ServicesRoute(Resource):
         services_discovered = []
 
         # # Addition by Martin Stusek
-        # services = list(ZeroconfServiceTypes.find(zc= zeroconf, ip_version=IPVersion.V4Only))
-        # services = [x if "local." in x else x + "local." for x in services]
-
         services = list(ZeroconfServiceTypes.find(timeout=0.1,zc= zeroconf))
+        services = [x if "local." in x else x + "local." for x in services]
 
         browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
 
         for info in collector.infos:
-             shelf[(info.name).lower()] = info
-             services_discovered.append(serviceToOutput(info, (info.name).lower()))    
+            if(info is not None):
+                shelf[(info.name).lower()] = info
+                services_discovered.append(serviceToOutput(info, (info.name).lower()))    
             
         return {'services': services_discovered}, 200
 
@@ -190,15 +189,12 @@ class ServicesRoute(Resource):
         print(args)
         for key in keys:
             if (wildcard_name == shelf[key].name):
-                return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
-
-        if ('subtype' in args.service):
-            parsedType = args.service['subtype'] + 'local.'
+                return {'code': 409, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 409
 
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-        if (args.service['txtRecords'] is not None): 
+        if (args.service['txtRecords'] is None): 
             args.service['txtRecords'] = {}
 
         if (not args.name):        

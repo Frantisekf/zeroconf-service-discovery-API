@@ -4,4 +4,5 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('DEBUG'), threaded=True)
+if (__name__ == "__main__"):
+    app.run(host=os.getenv('HOST'), port=os.getenv('PORT'), debug=os.getenv('DEBUG'), threaded=True)

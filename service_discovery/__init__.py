@@ -60,7 +60,6 @@ zeroconfGlobal = ZeroConf()
 
 
 
-# Declare Collector object which runs the service discovery browser
 class Collector:
     def __init__(self):
         self.infos = []
@@ -74,11 +73,9 @@ class Collector:
                 self.infos.append(info) 
         if state_change is ServiceStateChange.Removed:
             info = zeroconf.get_service_info(service_type, name)
-            if info not in self.infos:
-                self.infos.remove(info)
+            self.infos.remove(info)
         # TODO update
     
-collector = Collector()  
 
 
 def parseIPv4Addresses(addresses):
@@ -140,28 +137,24 @@ def index():
         return markdown.markdown(readme_content)
 
 
+collector = Collector()
+services = list(ZeroconfServiceTypes.find(zc= zeroconfGlobal.getZeroconf, ip_version=IPVersion.V4Only))
+services = [x if "local." in x else x + "local." for x in services]
+browser = ServiceBrowser(zeroconfGlobal.getZeroconf,services, handlers=[collector.on_service_state_change])
 class ServicesRoute(Resource):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG) 
 
     def get(self):
         shelf = get_db()
         services_discovered = []
         shelf.clear()
 
-        zeroconf = zeroconfGlobal.getZeroconf
-        services_discovered = []
-
-        # # Addition by Martin Stusek
-        services = list(ZeroconfServiceTypes.find(timeout=0.1,zc= zeroconf))
-        services = [x if "local." in x else x + "local." for x in services]
-
-        browser = ServiceBrowser(zeroconf, services, handlers=[collector.on_service_state_change])
-
         for info in collector.infos:
             if(info is not None):
                 shelf[(info.name).lower()] = info
                 services_discovered.append(serviceToOutput(info, (info.name).lower()))    
-            
+
+
         return {'services': services_discovered}, 200
 
     def post(self):
@@ -189,12 +182,15 @@ class ServicesRoute(Resource):
         print(args)
         for key in keys:
             if (wildcard_name == shelf[key].name):
-                return {'code': 409, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 409
+                return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
+
+        if ('subtype' in args.service):
+            parsedType = args.service['subtype'] + 'local.'
 
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-        if (args.service['txtRecords'] is None): 
+        if (args.service['txtRecords'] is not None): 
             args.service['txtRecords'] = {}
 
         if (not args.name):        

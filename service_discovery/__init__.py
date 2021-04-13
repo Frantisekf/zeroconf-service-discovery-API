@@ -172,7 +172,7 @@ class ServicesRoute(Resource):
         nested_service.add_argument('type', required=True, type=str, location='json')
         nested_service.add_argument('port', required=True, type=int, location='json')
         nested_service.add_argument('subtype', required=False, type=str, location='json')
-        nested_service.add_argument('txtRecords', required=False, type=dict, location='json')
+        nested_service.add_argument('txtRecord', required=False, type=dict, location='json')
 
         # parse arguments into an object
         args = parser.parse_args()
@@ -187,8 +187,8 @@ class ServicesRoute(Resource):
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-        if (args.service['txtRecords'] is None): 
-            args.service['txtRecords'] = {}
+        if (args.service['txtRecord'] is None): 
+            args.service['txtRecord'] = {}
 
         if (not args.name):        
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong service name', 'data': args}, 400
@@ -208,7 +208,7 @@ class ServicesRoute(Resource):
                     addresses=[socket.inet_aton("127.0.0.1")],
                     port=args.service['port'],
                     server=str(socket.gethostname() + '.'),
-                    properties=args.service['txtRecords']
+                    properties=args.service['txtRecord']
                 
             )
             zeroconf = zeroconfGlobal.getZeroconf

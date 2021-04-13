@@ -182,15 +182,12 @@ class ServicesRoute(Resource):
         print(args)
         for key in keys:
             if (wildcard_name == shelf[key].name):
-                return {'code': 400, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 400
-
-        if ('subtype' in args.service):
-            parsedType = args.service['subtype'] + 'local.'
+                return {'code': 409, 'message': 'Service already registered', 'reason': 'service with the same name has already been registered', 'data': args.name}, 409
 
         if (args.replaceWildcards):
             wildcard_name = str(args.name).split('.')[0] + ' at ' + socket.gethostname() + '.' + parsedType
     
-        if (args.service['txtRecords'] is not None): 
+        if (args.service['txtRecords'] is None): 
             args.service['txtRecords'] = {}
 
         if (not args.name):        

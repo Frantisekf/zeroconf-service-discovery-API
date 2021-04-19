@@ -19,7 +19,17 @@ Compatible with:
 
 ## Deploying
 To deploy the Zeroconf service/API on a device such as Rpi. make sure you have avahi installed on the device
-1. Run the launcher.sh script by running `sh launcher.sh`.
+ 
+1. Make sure you have git version control installed. if not run `sudo apt-get install git` 
+2. navigate to your home directory on raspberry pi should be `/home/pi/`
+And create directory for logs using `sudo mkdir logs` 
+3. Type in `sudo crontab -e` to open a the crontab config file
+4. in the crontab config file add the following line to the bottom of the file `@reboot sh /home/pi/zeroconf.api.service/launcher.sh  >/home/pi/logs/cronlog 2>&1`
+Make sure that the directory path leads to launcher.sh file in the project folder /home/pi/zeroconf.api.service/launcher.sh.
+5. Restart the Rpi using the command `sudo reboot`
+6. After the restart type the command `cat /home/pi/logs/cronlog` to see if the log is populated with logging output from API
+7. You can configure the port to be used by the API in `/zeroconf.api.service/.env` file
+
 
 
 Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env` file
@@ -109,14 +119,5 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
 **Response**
 
 - `201 created` on successful register 
-
-
-## TODO
-- [x] run each published service in a separate thread
-- [x] introduce unregister endpoint 
-- [x] improve error handling
-- [x] optimize usage of shelve
-- [ ] write tests
-- [ ] Logging 
 
 

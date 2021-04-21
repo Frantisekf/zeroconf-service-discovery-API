@@ -306,7 +306,7 @@ def method_not_allowed(error):
 
 
 @app.errorhandler(500)
-def method_not_allowed(error):
+def internal_server_error(error):
     print(error)
     return (
         jsonify(

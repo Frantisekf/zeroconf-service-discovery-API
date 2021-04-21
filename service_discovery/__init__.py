@@ -277,7 +277,7 @@ class ServiceRoute(Resource):
         zeroconf = zeroconfGlobal.getZeroconf
 
         if not (identifier in shelf):
-            return {"code": 404, "message": "Device not found", "data": {}}, 404
+            return {"code": 404, "message": "Device not found", "data": identifier}, 404
 
         zeroconf.unregister_service(shelf[identifier])
         del shelf[identifier]

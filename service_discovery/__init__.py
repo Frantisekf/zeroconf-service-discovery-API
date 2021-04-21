@@ -9,6 +9,8 @@ import logging
 from dotenv import load_dotenv
 import re
 from time import sleep
+from flask import jsonify
+
 
 from zeroconf import IPVersion, ServiceBrowser, ServiceInfo, Zeroconf, ServiceStateChange, ZeroconfServiceTypes
 
@@ -74,10 +76,7 @@ class Collector:
         if state_change is ServiceStateChange.Removed:
             info = zeroconf.get_service_info(service_type, name)
             self.infos.remove(info)
-        # TODO update
     
-
-
 def parseIPv4Addresses(addresses):
     ipv4_list = []
     for i in range(len(addresses)):
@@ -190,17 +189,13 @@ class ServicesRoute(Resource):
         if (args.service['txtRecord'] is None): 
             args.service['txtRecord'] = {}
 
-        if (not args.name):        
+        if (not args.name or not args.service['type'] or not (type(args.service['port']) == int)):        
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'wrong service name', 'data': args}, 400
 
-        if (not args.service['type']):
-            return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'type is missing', 'data': args}, 400
         elif (not args.service['type'].endswith('.') or len(str(args.name)) == 0):
             return {'code': 400, 'message': 'Bad parameter in request', 'reason': "wrong type format, subtype must end with '.'", 'data': args}, 400
         
-        if (not (type(args.service['port']) == int)):
-            return {'code': 400, 'message': 'Bad parameter in request', 'reason': 'port not set', 'data': args}, 400
- 
+      
         if args:
             new_service = ServiceInfo(
                     parsedType,
@@ -242,6 +237,14 @@ class ServiceRoute(Resource):
         del shelf[identifier]
         
         return '', 204
+
+
+# Error handlers
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    print(e)
+    return jsonify({'error': 405, 'reason': 'Method not allowed', 'message': 'request method you submitted is not known by the server'}), 405
 
 
 # Define routes

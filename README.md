@@ -114,7 +114,7 @@ Note: you can configure the `port`, `hostname` and set`DEBUG` level in the `.env
      "service": {
         "type": "_http._tcp.local.",
         "port": 7790,
-        "txtRecords": {
+        "txtRecord": {
             "property1": "prop",
             "property2": "prop",
             "property3": "prop"

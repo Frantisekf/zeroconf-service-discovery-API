@@ -108,7 +108,7 @@ def parseIPv6Addresses(addresses):
     return ipv6_list
 
 
-def serviceToOutput(info, index):
+def serviceToOutput(info):
     encoding = "utf-8"
     ipv4_list = parseIPv4Addresses(info.parsed_addresses())
     ipv6_list = parseIPv6Addresses(info.parsed_addresses())
@@ -118,7 +118,6 @@ def serviceToOutput(info, index):
     domain.reverse()
 
     service = {
-        "id": index,
         "name": info.name,
         "hostName": info.server,
         "domainName": domain[1] + ".",
@@ -168,7 +167,7 @@ class ServicesRoute(Resource):
         for info in collector.infos:
             if info is not None:
                 shelf[(info.name).lower()] = info
-                services_discovered.append(serviceToOutput(info, (info.name).lower()))
+                services_discovered.append(serviceToOutput(info))
 
         return {"services": services_discovered}, 200
 
@@ -178,7 +177,7 @@ class ServicesRoute(Resource):
 
         keys = list(shelf.keys())
 
-        parser.add_argument("name", required=True, type=str)
+        parser.add_argument("name", required=False, type=str)
         parser.add_argument("replaceWildcards", required=False, type=bool)
         parser.add_argument("serviceProtocol", required=False, type=str)
         parser.add_argument("service", required=True, type=dict)
@@ -228,7 +227,7 @@ class ServicesRoute(Resource):
             return {
                 "code": 400,
                 "message": "Bad parameter in request",
-                "reason": "wrong service name",
+                "reason": "Wrong input in the request's body",
                 "data": args,
             }, 400
 

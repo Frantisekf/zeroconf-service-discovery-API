@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 import re
 from flask import jsonify
 
-
 from zeroconf import (
     IPVersion,
     ServiceBrowser,
@@ -275,19 +274,22 @@ class ServiceRoute(Resource):
 
     def delete(self, identifier):
         shelf = get_db()
-
+        keys = list(shelf.keys())
         identifier = identifier.lower()
         zeroconf = zeroconfGlobal.getZeroconf
 
-        if not (identifier in shelf):
+        print(keys)
+        matching = [s for s in keys if identifier in s]
+
+        if not (matching[0] in shelf):
             return {
                 "code": 404,
                 "message": "Device not found",
                 "status": identifier,
             }, 404
 
-        zeroconf.unregister_service(shelf[identifier])
-        del shelf[identifier]
+        zeroconf.unregister_service(shelf[matching[0]])
+        del shelf[matching[0]]
 
         return "", 204
 

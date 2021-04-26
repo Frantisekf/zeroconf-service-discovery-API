@@ -150,7 +150,7 @@ services = list(
         zc=zeroconfGlobal.getZeroconf, ip_version=IPVersion.V4Only
     )
 )
-services = [x if "local." in x else x + "local." for x in services]
+# services = [x if "local." in x else x + "local." for x in services]
 browser = ServiceBrowser(
     zeroconfGlobal.getZeroconf, services, handlers=[collector.on_service_state_change]
 )

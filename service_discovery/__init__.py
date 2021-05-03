@@ -202,6 +202,17 @@ class ServicesRoute(Resource):
             else args.name + "." + args.service["type"]
         )
         parsedType = args.service["type"]
+
+        if "subtype" in args.service:
+            parsedType = args.service["subtype"]
+            wildcard_name = (
+                args.name + args.service["type"]
+                if args.service["subtype"].startswith(".")
+                else args.name + "." + args.service["subtype"]
+            )
+
+        print(args.name)
+        print(wildcard_name)
         for key in keys:
             if wildcard_name == shelf[key].name:
                 return {
@@ -220,8 +231,9 @@ class ServicesRoute(Resource):
                 + parsedType
             )
 
-        if args.service["txtRecord"] is None:
-            args.service["txtRecord"] = {}
+        if "txtRecord" in args.service:
+            if args.service["txtRecord"] is None:
+                args.service["txtRecord"] = {}
 
         if (
             not args.name
@@ -255,6 +267,8 @@ class ServicesRoute(Resource):
             zeroconf = zeroconfGlobal.getZeroconf
             zeroconf.register_service(new_service)
             shelf[(wildcard_name).lower()] = new_service
+
+            print(new_service)
 
         return {"code": 201, "message": "Service registered", "status": args}, 201
 

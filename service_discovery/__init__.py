@@ -151,6 +151,9 @@ services = list(
     )
 )
 
+# Add additional subtypes to the ones found
+services.extend(["_mqtt2go._http._tcp.local.", "_smb._tcp.local."])
+
 services = [x if "local." in x else x + "local." for x in services]
 browser = ServiceBrowser(
     zeroconfGlobal.getZeroconf, services, handlers=[collector.on_service_state_change]
@@ -211,8 +214,6 @@ class ServicesRoute(Resource):
                 else args.name + "." + args.service["subtype"]
             )
 
-        print(args.name)
-        print(wildcard_name)
         for key in keys:
             if wildcard_name == shelf[key].name:
                 return {
@@ -268,8 +269,6 @@ class ServicesRoute(Resource):
             zeroconf.register_service(new_service)
             shelf[(wildcard_name).lower()] = new_service
 
-            print(new_service)
-
         return {"code": 201, "message": "Service registered", "status": args}, 201
 
 
@@ -321,8 +320,6 @@ class ServiceRoute(Resource):
             }, 404
 
         service = shelf[matching[0]]
-
-        print(service.name)
 
         zeroconf.unregister_service(service)
         collector.infos.remove(service)

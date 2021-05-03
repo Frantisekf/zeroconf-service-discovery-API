@@ -200,18 +200,18 @@ class ServicesRoute(Resource):
         args = parser.parse_args()
 
         wildcard_name = (
-            args.name + args.service["type"]
+            args.name.split(".")[0] + args.service["type"]
             if args.service["type"].startswith(".")
-            else args.name + "." + args.service["type"]
+            else args.name.split(".")[0] + "." + args.service["type"]
         )
         parsedType = args.service["type"]
 
         if "subtype" in args.service:
             parsedType = args.service["subtype"]
             wildcard_name = (
-                args.name + args.service["type"]
+                args.name.split(".")[0] + args.service["type"]
                 if args.service["subtype"].startswith(".")
-                else args.name + "." + args.service["subtype"]
+                else args.name.split(".")[0] + "." + args.service["subtype"]
             )
 
         for key in keys:

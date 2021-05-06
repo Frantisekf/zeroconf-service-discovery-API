@@ -153,7 +153,14 @@ services = list(
 
 # Add additional subtypes to the ones found
 services.extend(
-    ["_mqtt2go._http._tcp.local.", "_smb._tcp.local.", "_flametouch._tcp.local."]
+    [
+        "_mqtt2go._http._tcp.local.",
+        "_smb._tcp.local.",
+        "_flametouch._tcp.local.",
+        "_mqtt._tcp.local.",
+        "_ssh._tcp.local.",
+        "_http._tcp.local.",
+    ]
 )
 
 services = [x if "local." in x else x + "local." for x in services]
@@ -174,8 +181,6 @@ class ServicesRoute(Resource):
             if info is not None:
                 shelf[(info.name).lower()] = info
                 services_discovered.append(serviceToOutput(info))
-
-        print(services)
 
         return {"services": services_discovered}, 200
 

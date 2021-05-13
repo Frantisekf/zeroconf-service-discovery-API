@@ -14,7 +14,7 @@ then
     echo "logs folder already exists"
     add_cronjob()
     
-else 
+else
     mkdir /home/pi/logs
     cd /home/pi/
     add_cronjob()

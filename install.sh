@@ -1,17 +1,17 @@
 #!/bin/sh
 
 #Defining variable for launcher
-launcher=/home/pi/zeroconf.api.service/launcher.sh
-logFile=/home/pi/logs/cronlog
+launcher=/home/pi/zeroconf-service-discovery-API/launcher.sh
+logFile=/home/pi/zeroconf/logs/cronlog
 
 
 #Testing if logs folder exists
-if [ -e "/home/pi/logs" ]
+if [ -e "/home/pi/zeroconf/logs" ]
 then
 	echo "Folder logs already exists"
 else
 	echo "Creating logs folder.."
-	mkdir /home/pi/logs
+	mkdir /home/pi/zeroconf/logs
     cd /home/pi/
 fi
 
@@ -20,7 +20,7 @@ fi
 add_cronjob () { 
     echo "Adding Zeroconf API as a cronjob"
     crontab -l > newcron
-    echo "@reboot sh /home/pi/zeroconf.api.service/launcher.sh > $logFile 2>&1" >> newcron
+    echo "@reboot sh /home/pi/zeroconf-service-discovery-API/launcher.sh > $logFile 2>&1" >> newcron
     crontab newcron
     rm -f newcron
 }

@@ -8,15 +8,12 @@ add_cronjob () {
     rm -f newcron
 }
 
+dir=/home/pi/logs
 
-if [ -d "/home/pi/logs" ]
-then
-    echo "logs folder already exists"
-    add_cronjob()
-    
-else
-    mkdir /home/pi/logs
-    cd /home/pi/
-    add_cronjob()
-fi 
+if [ ! -d $dir ]; then
+    mkdir $dir
+fi
+
+add_cronjob()
+
 echo "please restart your raspberry pi to start the ZeroConfAPI"

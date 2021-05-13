@@ -9,7 +9,7 @@ add_cronjob () {
 }
 
 
-if [[ -d "/home/pi/logs" ]]
+if [ -d "/home/pi/logs" ]
 then
     echo "logs folder already exists"
     add_cronjob()

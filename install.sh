@@ -2,13 +2,13 @@
 add_cronjob () { 
     echo "Adding Zeroconf API as a cronjob"
     crontab -l > newcron
-    echo "@reboot sh /home/pi/zeroconf.api.service/launcher.sh >/home/pi/logs/cronlog 2>&1" >> file
+    echo "@reboot sh /home/pi/zeroconf.api.service/launcher.sh >/home/pi/logs/cronlog 2>&1" >> newcron
     crontab newcron
     rm -f newcron
 }
 
 
-if [[ -d "/home/pi/logs" ]]
+if [ -d "/home/pi/logs" ]
 then
     echo "logs folder already exists"
     add_cronjob

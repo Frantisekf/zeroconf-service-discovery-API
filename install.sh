@@ -1,3 +1,4 @@
+#!/bin/sh
 
 add_cronjob () { 
     echo "Adding Zeroconf API as a cronjob"

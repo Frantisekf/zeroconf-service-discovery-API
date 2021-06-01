@@ -309,9 +309,6 @@ class ServicesRoute(Resource):
         return {"code": 201, "message": "Service registered", "status": args}, 201
 
 
-selfRegister()
-
-
 class ServiceRoute(Resource):
     def get(self, identifier):
         shelf = get_db()

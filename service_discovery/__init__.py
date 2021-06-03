@@ -148,8 +148,6 @@ def selfRegister():
         server=str(socket.gethostname() + "."),
     )
 
-    print(service)
-
     zeroconf = zeroconfGlobal.getZeroconf
     zeroconf.register_service(service)
 

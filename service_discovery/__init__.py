@@ -135,7 +135,7 @@ def serviceToOutput(info):
     return service
 
 
-@app.before_request
+@app.before_first_request
 def selfRegister():
     props = {"get": "/v1/zeroconf", "post": "/v1/zeroconf"}
 

@@ -435,5 +435,5 @@ def internal_server_error(error):
 #  Routes
 #####################
 
-api.add_resource(ServicesRoute, "/v1/zeroconf")
-api.add_resource(ServiceRoute, "/v1/zeroconf/<string:identifier>")
+api.add_resource(ServicesRoute, "/a1/xploretv/v1/zeroconf")
+api.add_resource(ServiceRoute, "/a1/xploretv/v1/zeroconf/<string:identifier>")

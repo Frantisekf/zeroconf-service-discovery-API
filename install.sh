@@ -2,18 +2,18 @@
 
 #Defining variable for launcher
 launcher=/home/pi/zeroconf-service-discovery-API/launcher.sh
-logFile=/home/pi/zeroconf/logs/cronlog
+logFile=/home/pi/zeroconf-service-discovery-API//logs/cronlog
 
 
 #Testing if logs folder exists
-if [ -e "/home/pi/zeroconf/logs" ]
-then
-	echo "Folder logs already exists"
-else
-	echo "Creating logs folder.."
-	mkdir /home/pi/zeroconf/logs
-    cd /home/pi/
-fi
+# if [ -e "/home/pi/zeroconf/logs" ]
+# then
+# 	echo "Folder logs already exists"
+# else
+# 	echo "Creating logs folder.."
+# 	mkdir /home/pi/zeroconf/logs
+#     cd /home/pi/
+# fi
 
 
 #Adding Zeroconf API to crontab

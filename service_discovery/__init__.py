@@ -120,7 +120,7 @@ def serviceToOutput(info):
     service = {
         "name": info.name.split(".")[0],
         "hostName": info.server,
-        "domainName": ".local.",
+        "domainName": "local",
         "addresses": {"ipv4": ipv4_list, "ipv6": ipv6_list},
         "service": {"type": info.type, "port": info.port, "txtRecord": {}},
     }
@@ -185,6 +185,8 @@ services = [x if "local." in x else x + "local." for x in services]
 browser = ServiceBrowser(
     zeroconfGlobal.getZeroconf, services, handlers=[collector.on_service_state_change]
 )
+
+print(services)
 
 
 class ServicesRoute(Resource):

@@ -9,6 +9,7 @@ import logging
 from dotenv import load_dotenv
 import re
 from flask import jsonify
+import netifaces
 
 from zeroconf import (
     IPVersion,
@@ -20,6 +21,8 @@ from zeroconf import (
 )
 
 load_dotenv()
+iface = netifaces.gateways()["default"][netifaces.AF_INET][1]
+ip_address = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]["addr"]
 
 # Create an instance of Flask
 app = Flask(__name__)
@@ -142,7 +145,7 @@ def selfRegister():
     service = ServiceInfo(
         "_http._tcp.local.",
         "ZeroConf Service Discovery API._http._tcp.local.",
-        addresses=[socket.inet_aton("127.0.0.1")],
+        addresses=[socket.inet_aton(ip_address)],
         port=int(os.getenv("PORT")),
         properties=props,
         server=str(socket.gethostname() + "."),
@@ -185,8 +188,6 @@ services = [x if "local." in x else x + "local." for x in services]
 browser = ServiceBrowser(
     zeroconfGlobal.getZeroconf, services, handlers=[collector.on_service_state_change]
 )
-
-print(services)
 
 
 class ServicesRoute(Resource):

@@ -20,7 +20,7 @@ logFile=/home/pi/zeroconf-service-discovery-API//logs/cronlog
 add_cronjob () { 
     echo "Adding Zeroconf API as a cronjob"
     crontab -l > newcron
-    echo "@reboot sh /home/pi/zeroconf/zeroconf-service-discovery-API/launcher.sh > $logFile 2>&1" >> newcron
+    echo "@reboot sh /etc/zeroconf-service-discovery-API/launcher.sh > $logFile 2>&1" >> newcron
     crontab newcron
     rm -f newcron
 }

@@ -3,8 +3,8 @@
 #Defining variable for launcher
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-launcher="${parent_path}+/launcher.sh"
-logFile="${parent_path}+/logs/cronlog"
+launcher="${parent_path}/launcher.sh"
+logFile="${parent_path}/logs/cronlog"
 
 
 #Adding Zeroconf API to crontab

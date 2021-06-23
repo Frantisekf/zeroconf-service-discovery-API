@@ -6,6 +6,17 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 launcher="${parent_path}/launcher.sh"
 logFile="${parent_path}/logs/cronlog"
 
+#Testing if logs folder exists
+if [ -e "${parent_path}/logs" ]
+then
+	echo "Folder logs already exists"
+else
+	echo "Creating logs folder.."
+	mkdir ${parent_path}/logs
+    cd /
+fi
+
+
 
 #Adding Zeroconf API to crontab
 add_cronjob () { 

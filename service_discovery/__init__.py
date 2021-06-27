@@ -22,6 +22,7 @@ from zeroconf import (
 load_dotenv()
 iface = netifaces.gateways()["default"][netifaces.AF_INET][1]
 ip_address = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]["addr"]
+ipv6_address = netifaces.ifaddresses(iface)[netifaces.AF_INET6][0]["addr"]
 
 # Create an instance of Flask
 app = Flask(__name__)
@@ -115,6 +116,9 @@ def serviceToOutput(info):
     ipv4_list = parseIPv4Addresses(info.parsed_addresses())
     ipv6_list = parseIPv6Addresses(info.parsed_addresses())
 
+    if ipv4_list[0] == "127.0.0.1":
+        ipv4_list = [ip_address]
+
     # split by . last element is an empty space
     domain = info.server.split(".")
     domain.reverse()
@@ -141,10 +145,14 @@ def serviceToOutput(info):
 def selfRegister():
     props = {"get": "/a1/xploretv/v1/zeroconf"}
 
+    print(ipv6_address)
+
     service = ServiceInfo(
         "_http._tcp.local.",
-        "ZeroConf Service Discovery API._http._tcp.local.",
-        addresses=[socket.inet_aton(ip_address)],
+        "ZeroConf Service Discovery API at "
+        + socket.gethostname()
+        + "._http._tcp.local.",
+        addresses=[socket.inet_aton(ip_address), socket.inet_aton(ip_address)],
         port=int(os.getenv("PORT")),
         properties=props,
         server=str(socket.gethostname() + "."),
@@ -304,7 +312,10 @@ class ServicesRoute(Resource):
             new_service = ServiceInfo(
                 parsedType,
                 wildcard_name,
-                addresses=[socket.inet_aton(ip_address)],
+                addresses=[
+                    socket.inet_aton(ip_address),
+                    socket.inet_aton(ipv6_address),
+                ],
                 port=args.service["port"],
                 server=str(socket.gethostname() + "."),
                 properties=args.service["txtRecord"],

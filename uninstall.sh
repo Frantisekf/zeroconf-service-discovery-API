@@ -28,7 +28,7 @@ case $ANSWER in
 		rm -R $parent_path  2>&1 > /dev/null
 		echo "Uninstallation completed!"
 		
-	N|n)
+	N|n);;
 		echo "Uninstallation aborted!";;
 	
 	*);;

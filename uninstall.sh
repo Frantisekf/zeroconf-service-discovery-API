@@ -8,8 +8,15 @@ logFile="${parent_path}/logs/cronlog"
 remove_cronjob () { 
     echo "Removing Zeroconf API cronjob"
     crontab -l > newcron
-    sed -i 's/\@reboot.*\(launcher.sh\).*/test/g' newcron
+    sed -i 's/\@reboot.*\(launcher.sh\).*/d' newcron
     crontab newcron
+	crontab -l | grep -i "$launcher"
+	if [ $? != 0 ]
+		then
+			echo "Cronjob removed!"
+		else
+			echo "Failed to remove cronjob!"
+	fi
     rm -f newcron
 }
 
@@ -23,13 +30,14 @@ case $ANSWER in
 	Y|y)
 		echo "Proceeding with uninstallation ..."
 		sleep 1
-		check_process remove_cronjob
+		remove_cronjob
 		echo "Removing all files and folders"
 		rm -R $parent_path  2>&1 > /dev/null
-		echo "Uninstallation completed!"
-		
-	N|n);;
+		echo "Uninstallation completed!";;
+		exit 0
+	N|n)
 		echo "Uninstallation aborted!";;
+		exit 1
 	
 	*);;
 esac

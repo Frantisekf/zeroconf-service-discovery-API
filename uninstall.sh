@@ -34,10 +34,8 @@ case $ANSWER in
 		echo "Removing all files and folders"
 		rm -R $parent_path  2>&1 > /dev/null
 		echo "Uninstallation completed!";;
-		exit 0
 	N|n)
-		echo "Uninstallation aborted!";;
-		exit 1
-	
+		echo "Uninstallation aborted!"
+		exit 1;;
 	*);;
 esac
